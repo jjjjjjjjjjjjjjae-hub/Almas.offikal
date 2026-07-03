@@ -1,4 +1,4 @@
-name: Block Pastebin Cloud Redirect and Rebuild
+name: Pure Binary Dex Patch and Rebuild
 
 on:
   push:
@@ -22,30 +22,64 @@ jobs:
     - name: Install Tools
       run: |
         sudo apt-get update
-        sudo apt-get install -y wget
-        wget https://github.com/iBotPeaches/Apktool/releases/download/v2.9.3/apktool_2.9.3.jar -O apktool.jar
+        sudo apt-get install -y wget zip unzip python3
         wget https://github.com/patrickfav/uber-apk-signer/releases/download/v1.3.0/uber-apk-signer-1.3.0.jar -O uber-apk-signer.jar
 
-    - name: Decompile APK
+    - name: Extract APK
       run: |
-        java -jar apktool.jar d -r mod_app.apk -o app_source
+        unzip -q mod_app.apk -d apk_extracted
 
-    - name: Block Cloud Redirect
+    - name: Binary Patch classes.dex and Fix Checksums
       run: |
-        echo "Pastebin бұлттық сілтемесін бұғаттау басталды..."
-        CLOUD_URL="https://pastebin.com/raw/c9jJGrAahypotii0"
-        
-        # 127.0.0.1 бұл телефонның өзі (localhost). Ол жерде ешқандай сайт жоқ, 
-        # сондықтан байланыс бірден үзіліп, қолданба ештеңе аша алмай қалады.
-        FAKE_URL="http://127.0.0.1/blocked_by_almas"
+        python3 -c '
+        import os
+        import hashlib
+        import zlib
+        import struct
 
-        # Барлық Smali кодтарынан Pastebin сілтемесін тауып, жалған сілтемеге ауыстырамыз
-        find app_source/ -type f -name "*.smali" -exec sed -i "s|$CLOUD_URL|$FAKE_URL|g" {} +
-        echo "Сілтеме сәтті бұғатталды!"
+        # Біз іздейтін түпнұсқа сілтеме (нақты 43 байт)
+        old_bytes = b"https://pastebin.com/raw/c9jJGrAahypotii0"
+        # Біз ауыстыратын жалған сілтеме (бұл да нақты 43 байт)
+        new_bytes = b"http://127.0.0.1/12345678901234567890123456"
 
-    - name: Recompile APK
+        def patch_dex(file_path):
+            with open(file_path, "rb") as f:
+                data = bytearray(f.read())
+            
+            if old_bytes in data:
+                print(f"🎯 Нысана табылды, патчталуда: {file_path}")
+                
+                # Байттарды тікелей офсет бойынша ауыстыру
+                data = data.replace(old_bytes, new_bytes)
+                
+                # ТҮЗЕТУ (DEX Header Fix): Бинарлық файл бұзылып қалмауы үшін хэштерді қайта есептейміз
+                # 1. SHA-1 Signature қайта есептеу (32-ші байттан бастап соңына дейін)
+                sha1 = hashlib.sha1()
+                sha1.update(data[32:])
+                data[12:32] = sha1.digest()
+                
+                # 2. Adler32 Checksum қайта есептеу (12-ші байттан бастап соңына дейін)
+                adler = zlib.adler32(data[12:]) & 0xffffffff
+                data[8:12] = struct.pack("<I", adler)
+                
+                with open(file_path, "wb") as f:
+                    f.write(data)
+                print(f"✅ {file_path} сәтті патчталды және чексумдары түзетілді!")
+            else:
+                pass
+
+        # APK ішіндегі барлық .dex файлдарды (classes.dex, classes2.dex т.б.) аралап шығамыз
+        for root, dirs, files in os.walk("apk_extracted"):
+            for file in files:
+                if file.endswith(".dex"):
+                    patch_dex(os.path.join(root, file))
+        '
+
+    - name: Repack APK
       run: |
-        java -jar apktool.jar b app_source -o patched_unsigned.apk
+        cd apk_extracted
+        zip -r ../patched_unsigned.apk .
+        cd ..
 
     - name: Sign APK
       run: |
@@ -54,5 +88,5 @@ jobs:
     - name: Upload Patched APK
       uses: actions/upload-artifact@v4
       with:
-        name: No-Cloud-Redirect-APK
+        name: Pure-Binary-Patched-APK
         path: output/*.apk
