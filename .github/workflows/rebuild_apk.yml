@@ -1,4 +1,4 @@
-name: Deep Binary Patch and Rebuild
+name: Logic Patch (Block startActivity) and Rebuild
 
 on:
   push:
@@ -30,52 +30,46 @@ jobs:
       run: |
         java -jar apktool.jar d -r mod_app.apk -o app_source
 
-    - name: Deep Binary Patching with Python
+    - name: Smali Logic Patching (Inject NOP)
       run: |
         python3 -c '
         import os
+        import re
+
+        print("Smali кодтарына логикалық патч жасау басталды...")
         
-        # Ескі мәліметтер (Түпнұсқа сілтеме мен хэш)
-        old_str = "t.me/+DBlkZ2lwQbRiNJM1"  # 21 таңба
-        old_hash = "DBlkZ2lwQbRiNJM1"       # 16 таңба
-        
-        # Жаңа мәліметтер (Ұзындығы ескісімен бірдей болуы БҰЛЖЫТПАС ТАЛАП!)
-        new_str = "t.me/AlmasOfficial123"  # 21 таңба
-        new_hash = "AlmasOfficial123"       # 16 таңба
-        
-        print("Байт деңгейінде іздеу және ауыстыру басталды...")
-        
+        # Репозиторийдегі бүкіл файлдарды тінтиміз
         for root, dirs, files in os.walk("app_source"):
             for file in files:
-                filepath = os.path.join(root, file)
-                try:
-                    with open(filepath, "rb") as f:
-                        data = f.read()
+                if file.endswith(".smali"):
+                    filepath = os.path.join(root, file)
                     
-                    replaced = False
-                    
-                    # 1. UTF-8 / ASCII форматтарын тексеру
-                    if old_str.encode("utf-8") in data:
-                        data = data.replace(old_str.encode("utf-8"), new_str.encode("utf-8"))
-                        replaced = True
-                    if old_hash.encode("utf-8") in data:
-                        data = data.replace(old_hash.encode("utf-8"), new_hash.encode("utf-8"))
-                        replaced = True
+                    try:
+                        with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+                            content = f.read()
                         
-                    # 2. UTF-16 LE (Ресурстар кестесіндегі жасырын мәтіндер) форматтарын тексеру
-                    if old_str.encode("utf-16le") in data:
-                        data = data.replace(old_str.encode("utf-16le"), new_str.encode("utf-16le"))
-                        replaced = True
-                    if old_hash.encode("utf-16le") in data:
-                        data = data.replace(old_hash.encode("utf-16le"), new_hash.encode("utf-16le"))
-                        replaced = True
-                        
-                    if replaced:
-                        with open(filepath, "wb") as f:
-                            f.write(data)
-                        print(f"✅ Патч сәтті қолданылды: {filepath}")
-                except Exception as e:
-                    pass
+                        # Егер файл ішінде ескі Telegram сілтемесінің хэші немесе бағыттау белгісі болса
+                        if "DBlkZ2lwQbRiNJM1" in content or "t.me" in content:
+                            print(f"🎯 Нысана табылды: {filepath}")
+                            
+                            # startActivity командаларын іздеп, оларды "nop" (ештеңе істемеу) бұйрығына ауыстырамыз
+                            # Бұл команда браузердің немесе Telegram-ның ашылуын түпкілікті бұғаттайды
+                            patched_content = re.sub(
+                                r"invoke-virtual \{.*\}, Landroid/.*->startActivity\(Landroid/content/Intent;\)V",
+                                "nop",
+                                content
+                            )
+                            patched_content = re.sub(
+                                r"invoke-static \{.*\}, Landroid/.*->startActivity\(.*\)",
+                                "nop",
+                                patched_content
+                            )
+                            
+                            with open(filepath, "w", encoding="utf-8") as f:
+                                f.write(patched_content)
+                            print("🛠 СӘТТІ: startActivity командасы БҰҒАТТАЛДЫ (nop қойылды).")
+                    except Exception as e:
+                        print(f"Қате файл оқуда: {e}")
         '
 
     - name: Recompile APK
