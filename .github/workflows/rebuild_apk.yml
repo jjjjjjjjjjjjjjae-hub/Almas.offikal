@@ -1,4 +1,4 @@
-name: Logic Patch (Block startActivity) and Rebuild
+name: Block Pastebin Cloud Redirect and Rebuild
 
 on:
   push:
@@ -22,7 +22,7 @@ jobs:
     - name: Install Tools
       run: |
         sudo apt-get update
-        sudo apt-get install -y wget python3
+        sudo apt-get install -y wget
         wget https://github.com/iBotPeaches/Apktool/releases/download/v2.9.3/apktool_2.9.3.jar -O apktool.jar
         wget https://github.com/patrickfav/uber-apk-signer/releases/download/v1.3.0/uber-apk-signer-1.3.0.jar -O uber-apk-signer.jar
 
@@ -30,47 +30,18 @@ jobs:
       run: |
         java -jar apktool.jar d -r mod_app.apk -o app_source
 
-    - name: Smali Logic Patching (Inject NOP)
+    - name: Block Cloud Redirect
       run: |
-        python3 -c '
-        import os
-        import re
-
-        print("Smali кодтарына логикалық патч жасау басталды...")
+        echo "Pastebin бұлттық сілтемесін бұғаттау басталды..."
+        CLOUD_URL="https://pastebin.com/raw/c9jJGrAahypotii0"
         
-        # Репозиторийдегі бүкіл файлдарды тінтиміз
-        for root, dirs, files in os.walk("app_source"):
-            for file in files:
-                if file.endswith(".smali"):
-                    filepath = os.path.join(root, file)
-                    
-                    try:
-                        with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
-                            content = f.read()
-                        
-                        # Егер файл ішінде ескі Telegram сілтемесінің хэші немесе бағыттау белгісі болса
-                        if "DBlkZ2lwQbRiNJM1" in content or "t.me" in content:
-                            print(f"🎯 Нысана табылды: {filepath}")
-                            
-                            # startActivity командаларын іздеп, оларды "nop" (ештеңе істемеу) бұйрығына ауыстырамыз
-                            # Бұл команда браузердің немесе Telegram-ның ашылуын түпкілікті бұғаттайды
-                            patched_content = re.sub(
-                                r"invoke-virtual \{.*\}, Landroid/.*->startActivity\(Landroid/content/Intent;\)V",
-                                "nop",
-                                content
-                            )
-                            patched_content = re.sub(
-                                r"invoke-static \{.*\}, Landroid/.*->startActivity\(.*\)",
-                                "nop",
-                                patched_content
-                            )
-                            
-                            with open(filepath, "w", encoding="utf-8") as f:
-                                f.write(patched_content)
-                            print("🛠 СӘТТІ: startActivity командасы БҰҒАТТАЛДЫ (nop қойылды).")
-                    except Exception as e:
-                        print(f"Қате файл оқуда: {e}")
-        '
+        # 127.0.0.1 бұл телефонның өзі (localhost). Ол жерде ешқандай сайт жоқ, 
+        # сондықтан байланыс бірден үзіліп, қолданба ештеңе аша алмай қалады.
+        FAKE_URL="http://127.0.0.1/blocked_by_almas"
+
+        # Барлық Smali кодтарынан Pastebin сілтемесін тауып, жалған сілтемеге ауыстырамыз
+        find app_source/ -type f -name "*.smali" -exec sed -i "s|$CLOUD_URL|$FAKE_URL|g" {} +
+        echo "Сілтеме сәтті бұғатталды!"
 
     - name: Recompile APK
       run: |
@@ -83,5 +54,5 @@ jobs:
     - name: Upload Patched APK
       uses: actions/upload-artifact@v4
       with:
-        name: No-Redirect-APK
+        name: No-Cloud-Redirect-APK
         path: output/*.apk
