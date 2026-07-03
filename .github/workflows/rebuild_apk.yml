@@ -1,4 +1,4 @@
-name: Remove Telegram Redirect and Rebuild
+name: Deep Binary Patch and Rebuild
 
 on:
   push:
@@ -22,24 +22,61 @@ jobs:
     - name: Install Tools
       run: |
         sudo apt-get update
-        sudo apt-get install -y wget
+        sudo apt-get install -y wget python3
         wget https://github.com/iBotPeaches/Apktool/releases/download/v2.9.3/apktool_2.9.3.jar -O apktool.jar
         wget https://github.com/patrickfav/uber-apk-signer/releases/download/v1.3.0/uber-apk-signer-1.3.0.jar -O uber-apk-signer.jar
 
-    - name: Decompile APK (Skipping Resources)
+    - name: Decompile APK
       run: |
-        # Бұл жерге -r флагы қосылды, ол қорғанысты айналып өтеді
         java -jar apktool.jar d -r mod_app.apk -o app_source
 
-    - name: Find and Replace Telegram Link
+    - name: Deep Binary Patching with Python
       run: |
-        echo "Сілтемелерді код ішінен іздеу басталды..."
-        OLD_LINK="t.me/+DBlkZ2lwQbRiNJM1"
-        NEW_LINK="t.me/Almas_Official" 
+        python3 -c '
+        import os
         
-        find app_source/ -type f -exec sed -i "s|$OLD_LINK|$NEW_LINK|g" {} +
-        find app_source/ -type f -exec sed -i "s|DBlkZ2lwQbRiNJM1|Almas_Mod_Menu|g" {} +
-        echo "Сілтемелер сәтті ауыстырылды!"
+        # Ескі мәліметтер (Түпнұсқа сілтеме мен хэш)
+        old_str = "t.me/+DBlkZ2lwQbRiNJM1"  # 21 таңба
+        old_hash = "DBlkZ2lwQbRiNJM1"       # 16 таңба
+        
+        # Жаңа мәліметтер (Ұзындығы ескісімен бірдей болуы БҰЛЖЫТПАС ТАЛАП!)
+        new_str = "t.me/AlmasOfficial123"  # 21 таңба
+        new_hash = "AlmasOfficial123"       # 16 таңба
+        
+        print("Байт деңгейінде іздеу және ауыстыру басталды...")
+        
+        for root, dirs, files in os.walk("app_source"):
+            for file in files:
+                filepath = os.path.join(root, file)
+                try:
+                    with open(filepath, "rb") as f:
+                        data = f.read()
+                    
+                    replaced = False
+                    
+                    # 1. UTF-8 / ASCII форматтарын тексеру
+                    if old_str.encode("utf-8") in data:
+                        data = data.replace(old_str.encode("utf-8"), new_str.encode("utf-8"))
+                        replaced = True
+                    if old_hash.encode("utf-8") in data:
+                        data = data.replace(old_hash.encode("utf-8"), new_hash.encode("utf-8"))
+                        replaced = True
+                        
+                    # 2. UTF-16 LE (Ресурстар кестесіндегі жасырын мәтіндер) форматтарын тексеру
+                    if old_str.encode("utf-16le") in data:
+                        data = data.replace(old_str.encode("utf-16le"), new_str.encode("utf-16le"))
+                        replaced = True
+                    if old_hash.encode("utf-16le") in data:
+                        data = data.replace(old_hash.encode("utf-16le"), new_hash.encode("utf-16le"))
+                        replaced = True
+                        
+                    if replaced:
+                        with open(filepath, "wb") as f:
+                            f.write(data)
+                        print(f"✅ Патч сәтті қолданылды: {filepath}")
+                except Exception as e:
+                    pass
+        '
 
     - name: Recompile APK
       run: |
