@@ -1,44 +1,37 @@
 <!doctype html>
 <html lang="kk">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>ALMAS OFFICAL • Friend Invite</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ALMAS OFFICAL • Connect</title>
 <style>
-:root{color-scheme:dark;--bg:#07090f;--card:#121622;--p:#7c5cff;--mut:#9aa4ba}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at 30% 0,#322276 0,transparent 36%),var(--bg);font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#fff}
-.box{width:min(92vw,480px);padding:22px;border:1px solid #303650;border-radius:26px;background:rgba(18,22,34,.96);box-shadow:0 22px 70px #0009}
-.logo{font-size:29px;font-weight:900}.sub{margin-top:4px;font-size:12px;letter-spacing:.08em;color:#c7bfff}.invite{margin:20px 0;padding:16px;border-radius:18px;background:#0b0e17}.who{font-size:20px;font-weight:800}.small{font-size:13px;color:var(--mut);margin-top:5px;line-height:1.45}
-button{width:100%;height:54px;border:0;border-radius:16px;background:var(--p);color:#fff;font-size:16px;font-weight:900;cursor:pointer}
-.note{margin-top:12px;text-align:center;font-size:12px;color:var(--mut)}
+:root{color-scheme:dark;--bg:#080a10;--card:#131722;--p:#7558ff;--mut:#98a1b5}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:white}
+.card{width:min(92vw,430px);padding:24px;border-radius:24px;background:var(--card);border:1px solid #2c3242;text-align:center}
+.logo{font-size:28px;font-weight:900}.sub{font-size:12px;color:#c8c1ff;margin-top:4px;letter-spacing:.08em}
+.msg{margin:22px 0;font-size:16px;line-height:1.5}.mut{color:var(--mut);font-size:12px;margin-top:12px}
+button{width:100%;height:54px;border:0;border-radius:16px;background:var(--p);color:white;font-size:16px;font-weight:900}
 </style>
-</head>
-<body>
-<div class="box">
+</head><body>
+<div class="card">
   <div class="logo">ALMAS OFFICAL</div>
-  <div class="sub">BLACK RUSSIA • DEVICE CONNECT</div>
-  <div class="invite">
-    <div class="who" id="who">Досқа шақыру</div>
-    <div class="small" id="room">Қолданбаны ашу үшін төмендегі батырманы бас.</div>
-  </div>
+  <div class="sub">DEVICE BRIDGE</div>
+  <div class="msg" id="msg">Құрылғыны қолданбаға қосу</div>
   <button id="open">Қолданбада ашу</button>
-  <div class="note">Бұл GitHub.io беті тек құрылғыларды қолданбаға жалғайды. Экран/дауыс сайтта көрсетілмейді.</div>
+  <div class="mut">GitHub.io тек екі телефон арасындағы сілтемені қолданбаға өткізеді.</div>
 </div>
 <script>
 const q=new URLSearchParams(location.search);
-const invite=(q.get('invite')||'').trim();
-const room=(q.get('room')||'').trim();
-document.getElementById('who').textContent=invite?invite+' сені досқа шақырды':'ALMAS OFFICAL шақыруы';
-document.getElementById('room').textContent=room?'Connection: '+room:'Қолданбаны ашу үшін төмендегі батырманы бас.';
+const fromId=(q.get('fromId')||'').trim();
+const fromNick=(q.get('fromNick')||'').trim();
+document.getElementById('msg').textContent=fromNick&&fromId
+  ? fromNick+' ('+fromId+') сені қосылуға шақырды'
+  : 'ALMAS OFFICAL қолданбасын ашу';
 function intentUrl(){
   const fb=encodeURIComponent(location.href);
-  return 'intent://join?room='+encodeURIComponent(room)+'&friend='+encodeURIComponent(invite)+'#Intent;scheme=almasoffical;package=kz.almasofficial.br.universal;S.browser_fallback_url='+fb+';end';
+  return 'intent://connect?friendId='+encodeURIComponent(fromId)+'&friendNick='+encodeURIComponent(fromNick)
+    +'#Intent;scheme=almasoffical;package=kz.almasofficial.br.universal;S.browser_fallback_url='+fb+';end';
 }
-function openApp(){ location.href=intentUrl(); }
+function openApp(){location.href=intentUrl()}
 document.getElementById('open').onclick=openApp;
-// Android браузер рұқсат етсе, link ашылғанда қолданбаны бірден шақырамыз.
-// Браузер сыртқы қолданбаны auto-open-нан қорғаса, үлкен батырма fallback болып қалады.
-setTimeout(openApp,350);
-</script>
-</body>
-</html>
+setTimeout(openApp,300);
+</script></body></html>
