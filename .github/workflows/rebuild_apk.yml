@@ -44,22 +44,22 @@ jobs:
         run: gradle --no-daemon assembleDebug
 
       - name: Copy release file
-        run: cp bridge-app/app/build/outputs/apk/debug/app-debug.apk ALMAS-OFFICAL-BRIDGE-v0.6.apk
+        run: cp bridge-app/app/build/outputs/apk/debug/app-debug.apk ALMAS-OFFICAL-BRIDGE-v0.7.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ALMAS-OFFICAL-BRIDGE-v0.6
-          path: ALMAS-OFFICAL-BRIDGE-v0.6.apk
+          name: ALMAS-OFFICAL-BRIDGE-v0.7
+          path: ALMAS-OFFICAL-BRIDGE-v0.7.apk
 
       - name: Publish latest APK to repository
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f ALMAS-OFFICAL-BRIDGE-v0.6.apk
+          git add -f ALMAS-OFFICAL-BRIDGE-v0.7.apk
           if git diff --cached --quiet; then
             echo "APK unchanged"
           else
-            git commit -m "Build ALMAS OFFICAL bridge APK v0.6"
+            git commit -m "Build ALMAS OFFICAL bridge APK v0.7"
             git push
           fi
