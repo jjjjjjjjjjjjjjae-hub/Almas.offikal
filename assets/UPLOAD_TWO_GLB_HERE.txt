@@ -1,0 +1,3 @@
+Upload only these two files here:
+1) sendstone_new.glb
+2) sas__cs2_agent_model_blue.glb
