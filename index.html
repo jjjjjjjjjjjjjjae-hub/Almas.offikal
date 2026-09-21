@@ -37,19 +37,7 @@ function size(o){return box(o).getSize(new THREE.Vector3())}
 function frame(o){const b=box(o),s=b.getSize(new THREE.Vector3()),c=b.getCenter(new THREE.Vector3()),m=Math.max(s.x,s.y,s.z)||1,d=m/(2*Math.tan(THREE.MathUtils.degToRad(camera.fov)/2))*1.45;camera.near=Math.max(.0001,m/10000);camera.far=Math.max(100,m*1000);camera.updateProjectionMatrix();camera.position.set(c.x+d*.75,c.y+d*.55,c.z+d);controls.target.copy(c);controls.update()}
 function floorY(x,z){const b=box(map),h=Math.max(.1,b.max.y-b.min.y),ray=new THREE.Raycaster(new THREE.Vector3(x,b.max.y+h*3,z),new THREE.Vector3(0,-1,0),0,h*8),hits=ray.intersectObject(map,true),nm=new THREE.Matrix3(),ys=[];for(const hit of hits){if(!hit.face)continue;nm.getNormalMatrix(hit.object.matrixWorld);const n=hit.face.normal.clone().applyMatrix3(nm).normalize();if(n.y>.42)ys.push(hit.point.y)}return ys.length?Math.max(...ys):b.min.y}
 function place(){player.position.set(0,0,0);player.rotation.set(0,0,0);player.scale.set(1,1,1);player.updateMatrixWorld(true);const s=size(player);if(s.x>=s.y&&s.x>=s.z)player.rotation.z=Math.PI/2;else if(s.z>=s.x&&s.z>=s.y)player.rotation.x=-Math.PI/2;player.updateMatrixWorld(true);const mb=box(map),mc=mb.getCenter(new THREE.Vector3()),pb=box(player),pc=pb.getCenter(new THREE.Vector3());player.position.x+=mc.x-pc.x;player.position.z+=mc.z-pc.z;player.updateMatrixWorld(true);player.position.y+=floorY(player.position.x,player.position.z)-box(player).min.y;player.updateMatrixWorld(true)}
-async function loadGzipGLB(url){
- const res=await fetch(url,{cache:'no-cache'});if(!res.ok)throw new Error(url+' HTTP '+res.status);
- const ds=new DecompressionStream('gzip');
- const buf=await new Response(res.body.pipeThrough(ds)).arrayBuffer();
- return await new Promise((resolve,reject)=>loader.parse(buf,'',resolve,reject));
-}
-async function start(){try{
- txt.textContent='sendstone_new.glb ашылуда…';
- const mg=await loadGzipGLB('./assets/sendstone_new.glb.gz');map=mg.scene;map.traverse(o=>{if(o.isMesh)o.receiveShadow=true});scene.add(map);
- txt.textContent='sas__cs2_agent_model_blue.glb ашылуда…';
- const pg=await loadGzipGLB('./assets/sas__cs2_agent_model_blue.glb.gz');player=pg.scene;player.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});scene.add(player);
- place();frame(map);loading.classList.add('hide')
- }catch(e){console.error(e);txt.textContent='Жүктеу қатесі: '+e.message}}
+async function start(){try{txt.textContent='sendstone_new.glb жүктелуде…';const mg=await loader.loadAsync('./assets/sendstone_new.glb');map=mg.scene;map.traverse(o=>{if(o.isMesh)o.receiveShadow=true});scene.add(map);txt.textContent='sas__cs2_agent_model_blue.glb жүктелуде…';const pg=await loader.loadAsync('./assets/sas__cs2_agent_model_blue.glb');player=pg.scene;player.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});scene.add(player);place();frame(map);loading.classList.add('hide')}catch(e){console.error(e);txt.textContent='Екі GLB файл assets ішінде әлі жоқ'}}
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 renderer.setAnimationLoop(()=>{controls.update();renderer.render(scene,camera)});
 start();
