@@ -1,8 +1,14 @@
 {
   "channel": "stable",
-  "contentVersion": 1,
-  "versionName": "0.6.5",
-  "message": "Base updater installed",
-  "files": [],
-  "extraScripts": []
+  "contentVersion": 2,
+  "versionName": "0.6.6",
+  "message": "Running FOV + crosshair update",
+  "files": [
+    {
+      "path": "run-fov.js",
+      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/run-fov.js",
+      "mime": "text/javascript"
+    }
+  ],
+  "extraScripts": ["run-fov.js"]
 }
