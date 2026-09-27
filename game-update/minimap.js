@@ -57,6 +57,10 @@
     const mapSize = bounds.getSize(new THREE.Vector3());
     const half = Math.max(mapSize.x, mapSize.z) * 0.52 || 1;
 
+    // Only show a small local area around the player instead of the whole map.
+    const localHalfWorld = Math.max(10, Math.min(34, Math.max(mapSize.x, mapSize.z) * 0.18));
+    const localScale = SIZE / (2 * localHalfWorld);
+
     function drawFallback(){
       bgCtx.clearRect(0,0,SIZE,SIZE);
       bgCtx.fillStyle = '#31403a';
@@ -135,27 +139,43 @@
       }
     }
 
-    function worldToMap(x,z){
+    function worldToFullMap(x,z){
       return {
         x: SIZE * (0.5 + (x - center.x) / (2 * half)),
         y: SIZE * (0.5 + (z - center.z) / (2 * half))
       };
     }
 
-    function drawArrow(x,y,yaw){
+    function drawPlayerPerson(x,y,yaw){
       ctx.save();
       ctx.translate(x,y);
-      ctx.rotate(-(yaw || 0));
-      ctx.beginPath();
-      ctx.moveTo(0,-11);
-      ctx.lineTo(7,8);
-      ctx.lineTo(0,5);
-      ctx.lineTo(-7,8);
-      ctx.closePath();
-      ctx.fillStyle = '#f6fbf8';
-      ctx.shadowColor = 'rgba(0,0,0,.65)';
+
+      // Fix: the old marker was 180 degrees backwards.
+      // Head points toward the actual forward direction.
+      ctx.rotate(Math.PI - (yaw || 0));
+      ctx.shadowColor = 'rgba(0,0,0,.72)';
       ctx.shadowBlur = 4;
+      ctx.fillStyle = '#f7fbf8';
+      ctx.strokeStyle = 'rgba(24,31,28,.62)';
+      ctx.lineWidth = 1.6;
+
+      // Head
+      ctx.beginPath();
+      ctx.arc(0,-8.5,3.8,0,Math.PI*2);
       ctx.fill();
+      ctx.stroke();
+
+      // Body/shoulders: small person-shaped marker, facing toward the head.
+      ctx.beginPath();
+      ctx.moveTo(0,-4.2);
+      ctx.lineTo(6.2,3.2);
+      ctx.lineTo(3.4,8.8);
+      ctx.lineTo(0,6.2);
+      ctx.lineTo(-3.4,8.8);
+      ctx.lineTo(-6.2,3.2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
       ctx.restore();
     }
 
@@ -181,29 +201,50 @@
       if (now - lastDraw < 50) return;
       lastDraw = now;
 
+      let state = null;
+      try { state = window.getLocalPlayerState && window.getLocalPlayerState(); } catch (_) {}
+
       ctx.clearRect(0,0,SIZE,SIZE);
       ctx.save();
       ctx.beginPath();
       ctx.arc(SIZE/2,SIZE/2,SIZE/2-2,0,Math.PI*2);
       ctx.clip();
-      ctx.drawImage(bg,0,0,SIZE,SIZE);
-      ctx.fillStyle = 'rgba(18,26,23,.16)';
+      ctx.fillStyle = '#31403a';
       ctx.fillRect(0,0,SIZE,SIZE);
 
-      let state = null;
-      try { state = window.getLocalPlayerState && window.getLocalPlayerState(); } catch (_) {}
       if (state && Number.isFinite(state.x) && Number.isFinite(state.z)) {
-        const p = worldToMap(state.x,state.z);
-        drawArrow(p.x,p.y,state.yaw || 0);
-      }
+        const playerOnFull = worldToFullMap(state.x, state.z);
+        const zoom = half / localHalfWorld;
 
-      try {
-        const opp = window.getOpponentAvatar && window.getOpponentAvatar();
-        if (opp && opp.root && opp.root.visible) {
-          const p = worldToMap(opp.root.position.x, opp.root.position.z);
-          drawOpponent(p.x,p.y);
-        }
-      } catch (_) {}
+        // Crop/zoom the already-rendered real map around the player.
+        ctx.drawImage(
+          bg,
+          SIZE/2 - playerOnFull.x * zoom,
+          SIZE/2 - playerOnFull.y * zoom,
+          SIZE * zoom,
+          SIZE * zoom
+        );
+
+        ctx.fillStyle = 'rgba(18,26,23,.12)';
+        ctx.fillRect(0,0,SIZE,SIZE);
+
+        // Player stays fixed in the centre; only nearby map moves underneath.
+        drawPlayerPerson(SIZE/2, SIZE/2, state.yaw || 0);
+
+        try {
+          const opp = window.getOpponentAvatar && window.getOpponentAvatar();
+          if (opp && opp.root && opp.root.visible) {
+            const dx = opp.root.position.x - state.x;
+            const dz = opp.root.position.z - state.z;
+            const ox = SIZE/2 + dx * localScale;
+            const oy = SIZE/2 + dz * localScale;
+            const rr = Math.hypot(ox - SIZE/2, oy - SIZE/2);
+            if (rr < SIZE/2 - 10) drawOpponent(ox,oy);
+          }
+        } catch (_) {}
+      } else {
+        ctx.drawImage(bg,0,0,SIZE,SIZE);
+      }
       ctx.restore();
 
       ctx.save();
@@ -219,8 +260,13 @@
     Object.assign(window.gameDiagnostics, {
       circularMiniMap: true,
       miniMapTopLeft: true,
+      miniMapLocalAreaOnly: true,
+      miniMapPlayerCentered: true,
+      miniMapPlayerPersonMarker: true,
+      miniMapDirectionFixed180: true,
       miniMapShowsOpponent: true,
-      miniMapUsesRealMapTopView: true
+      miniMapUsesRealMapTopView: true,
+      miniMapLocalHalfWorld: localHalfWorld
     });
   }
 
