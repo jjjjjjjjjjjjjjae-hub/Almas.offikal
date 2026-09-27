@@ -1,8 +1,8 @@
 {
   "channel": "stable",
-  "contentVersion": 4,
-  "versionName": "0.6.8",
-  "message": "Faster touch look + grip-safe knife equip + weapon inspect animations",
+  "contentVersion": 5,
+  "versionName": "0.6.9",
+  "message": "Circular top-left minimap",
   "files": [
     {
       "path": "run-fov.js",
@@ -18,7 +18,12 @@
       "path": "knife-hand-inspect.js",
       "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/knife-hand-inspect.js",
       "mime": "text/javascript"
+    },
+    {
+      "path": "minimap.js",
+      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/minimap.js",
+      "mime": "text/javascript"
     }
   ],
-  "extraScripts": ["run-fov.js", "look-sensitivity.js", "knife-hand-inspect.js"]
+  "extraScripts": ["run-fov.js", "look-sensitivity.js", "knife-hand-inspect.js", "minimap.js"]
 }
