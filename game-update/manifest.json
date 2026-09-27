@@ -1,8 +1,8 @@
 {
   "channel": "stable",
-  "contentVersion": 7,
-  "versionName": "0.7.1",
-  "message": "Pistol + automatic rifle + double-barrel shotgun",
+  "contentVersion": 8,
+  "versionName": "0.7.2",
+  "message": "Two-hand weapon hold animations prepared for Sketchfab weapon models",
   "files": [
     {
       "path": "run-fov.js",
@@ -28,7 +28,12 @@
       "path": "weapons-pack.js",
       "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/weapons-pack.js",
       "mime": "text/javascript"
+    },
+    {
+      "path": "weapon-hold-anim.js",
+      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/weapon-hold-anim.js",
+      "mime": "text/javascript"
     }
   ],
-  "extraScripts": ["run-fov.js", "look-sensitivity.js", "knife-hand-inspect.js", "minimap.js", "weapons-pack.js"]
+  "extraScripts": ["run-fov.js", "look-sensitivity.js", "knife-hand-inspect.js", "minimap.js", "weapons-pack.js", "weapon-hold-anim.js"]
 }
