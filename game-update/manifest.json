@@ -1,8 +1,8 @@
 {
   "channel": "stable",
-  "contentVersion": 6,
-  "versionName": "0.7.0",
-  "message": "Local player-centered minimap + corrected player direction",
+  "contentVersion": 7,
+  "versionName": "0.7.1",
+  "message": "Pistol + automatic rifle + double-barrel shotgun",
   "files": [
     {
       "path": "run-fov.js",
@@ -23,7 +23,12 @@
       "path": "minimap.js",
       "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/minimap.js",
       "mime": "text/javascript"
+    },
+    {
+      "path": "weapons-pack.js",
+      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/weapons-pack.js",
+      "mime": "text/javascript"
     }
   ],
-  "extraScripts": ["run-fov.js", "look-sensitivity.js", "knife-hand-inspect.js", "minimap.js"]
+  "extraScripts": ["run-fov.js", "look-sensitivity.js", "knife-hand-inspect.js", "minimap.js", "weapons-pack.js"]
 }
