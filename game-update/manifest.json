@@ -1,14 +1,19 @@
 {
   "channel": "stable",
-  "contentVersion": 2,
-  "versionName": "0.6.6",
-  "message": "Running FOV + crosshair update",
+  "contentVersion": 3,
+  "versionName": "0.6.7",
+  "message": "Realistic hand sway + knife inspect twirl",
   "files": [
     {
       "path": "run-fov.js",
       "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/run-fov.js",
       "mime": "text/javascript"
+    },
+    {
+      "path": "knife-hand-inspect.js",
+      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/knife-hand-inspect.js",
+      "mime": "text/javascript"
     }
   ],
-  "extraScripts": ["run-fov.js"]
+  "extraScripts": ["run-fov.js", "knife-hand-inspect.js"]
 }
