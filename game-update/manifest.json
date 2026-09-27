@@ -1,12 +1,17 @@
 {
   "channel": "stable",
-  "contentVersion": 3,
-  "versionName": "0.6.7",
-  "message": "Realistic hand sway + knife inspect twirl",
+  "contentVersion": 4,
+  "versionName": "0.6.8",
+  "message": "Faster touch look + grip-safe knife equip + weapon inspect animations",
   "files": [
     {
       "path": "run-fov.js",
       "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/run-fov.js",
+      "mime": "text/javascript"
+    },
+    {
+      "path": "look-sensitivity.js",
+      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/look-sensitivity.js",
       "mime": "text/javascript"
     },
     {
@@ -15,5 +20,5 @@
       "mime": "text/javascript"
     }
   ],
-  "extraScripts": ["run-fov.js", "knife-hand-inspect.js"]
+  "extraScripts": ["run-fov.js", "look-sensitivity.js", "knife-hand-inspect.js"]
 }
