@@ -7,6 +7,12 @@ on:
     paths:
       - 'AlmasNetRoot/**'
       - '.github/workflows/almasnetroot-build.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'AlmasNetRoot/**'
+      - '.github/workflows/almasnetroot-build.yml'
   workflow_dispatch:
 
 jobs:
