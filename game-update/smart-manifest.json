@@ -1,6 +1,6 @@
 {
   "channel": "stable",
-  "contentVersion": 2,
+  "contentVersion": 3,
   "versionName": "0.8.1",
   "message": "Smart updater v2 with reinstall recovery and offline cache fallback",
   "files": [
@@ -10,8 +10,7 @@
       "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/smart-updater.js",
       "mime": "text/javascript",
       "revision": "smart-2",
-      "fileVersion": 2,
-      "legacyVersion": 9
+      "fileVersion": 2
     },
     {
       "path": "run-fov.js",
