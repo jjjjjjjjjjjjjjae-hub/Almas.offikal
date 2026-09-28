@@ -1,0 +1,79 @@
+{
+  "channel": "stable",
+  "contentVersion": 1,
+  "versionName": "0.8.0",
+  "message": "Smart incremental updater with reinstall recovery",
+  "files": [
+    {
+      "path": "smart-updater.js",
+      "label": "Жаңарту жүйесі",
+      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/smart-updater.js",
+      "mime": "text/javascript",
+      "revision": "smart-1",
+      "fileVersion": 1,
+      "legacyVersion": 9
+    },
+    {
+      "path": "run-fov.js",
+      "label": "Жүгіру FOV",
+      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/run-fov.js",
+      "mime": "text/javascript",
+      "revision": "8304919bf7f5e5799837d2d8169df0e306fa966d",
+      "fileVersion": 1,
+      "legacyVersion": 8
+    },
+    {
+      "path": "look-sensitivity.js",
+      "label": "Камера сезімталдығы",
+      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/look-sensitivity.js",
+      "mime": "text/javascript",
+      "revision": "4f79f9a1209b2ce00ce66e11172b24e6200b48c0",
+      "fileVersion": 1,
+      "legacyVersion": 8
+    },
+    {
+      "path": "knife-hand-inspect.js",
+      "label": "Қол және пышақ анимациялары",
+      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/knife-hand-inspect.js",
+      "mime": "text/javascript",
+      "revision": "056ecae365b050bb9284ead86b3402f2aa21e6cc",
+      "fileVersion": 1,
+      "legacyVersion": 8
+    },
+    {
+      "path": "minimap.js",
+      "label": "Mini-map",
+      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/minimap.js",
+      "mime": "text/javascript",
+      "revision": "d52139739e7285145165eae0a0299e0cee463d5b",
+      "fileVersion": 1,
+      "legacyVersion": 8
+    },
+    {
+      "path": "weapons-pack.js",
+      "label": "Қару жүйесі",
+      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/weapons-pack.js",
+      "mime": "text/javascript",
+      "revision": "14adad2b947278ce21dfea908893222ddeb20c58",
+      "fileVersion": 1,
+      "legacyVersion": 8
+    },
+    {
+      "path": "weapon-hold-anim.js",
+      "label": "Қаруды ұстау анимациясы",
+      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/weapon-hold-anim.js",
+      "mime": "text/javascript",
+      "revision": "f8607997fb0b4b18c5f30ebdf4f8bd152fa94675",
+      "fileVersion": 1,
+      "legacyVersion": 8
+    }
+  ],
+  "extraScripts": [
+    "run-fov.js",
+    "look-sensitivity.js",
+    "knife-hand-inspect.js",
+    "minimap.js",
+    "weapons-pack.js",
+    "weapon-hold-anim.js"
+  ]
+}
