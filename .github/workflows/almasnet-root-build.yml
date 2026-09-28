@@ -18,6 +18,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Mark build started
+        run: |
+          printf 'started %s\n' "$(date -u +%FT%TZ)" > AlmasNetRoot-build-started.txt
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add AlmasNetRoot-build-started.txt
+          git commit -m 'AlmasNetRoot build started' || true
+          git push origin HEAD:almasnet-root-build-20260928
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -51,8 +60,6 @@ jobs:
 
       - name: Publish APK payload to build branch
         run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add AlmasNetRoot-debug.apk.b64
           git commit -m 'Publish AlmasNetRoot APK' || exit 0
           git push origin HEAD:almasnet-root-build-20260928
