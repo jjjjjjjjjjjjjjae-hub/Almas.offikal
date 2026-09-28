@@ -9,6 +9,8 @@
   const STORE = 'files';
   const STATE_KEY = 'almas_smart_content_version';
   const READY_KEY = 'almas_smart_updater_ready';
+  const MANIFEST_CACHE_KEY = 'almas_smart_manifest_cache';
+  const FALLBACK_EXTRAS = ['run-fov.js','look-sensitivity.js','knife-hand-inspect.js','minimap.js','weapons-pack.js','weapon-hold-anim.js'];
 
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const fmtBytes = n => {
@@ -69,8 +71,17 @@
     try{
       const r=await fetch(MANIFEST_URL+(MANIFEST_URL.includes('?')?'&':'?')+'_='+Date.now(),{cache:'no-store',signal:ctrl.signal});
       if(!r.ok) throw new Error('Manifest HTTP '+r.status);
-      return await r.json();
+      const m=await r.json();
+      try{ localStorage.setItem(MANIFEST_CACHE_KEY,JSON.stringify(m)); }catch(_){}
+      return m;
     }finally{clearTimeout(timer);}
+  }
+
+  function readCachedManifest(){
+    try{
+      const raw=localStorage.getItem(MANIFEST_CACHE_KEY);
+      return raw?JSON.parse(raw):null;
+    }catch(_){ return null; }
   }
 
   function ensureOverlay(){
@@ -169,8 +180,16 @@
     return true;
   }
 
+  async function runExtraPaths(db,extras){
+    for(const path of extras){
+      if(path==='smart-updater.js') continue;
+      try{ await loadScriptFromDb(db,path); }
+      catch(e){ console.warn('[ALMAS smart updater] extra failed',path,e); }
+    }
+  }
+
   async function runExtras(db,manifest){
-    const extras=Array.isArray(manifest.extraScripts)?manifest.extraScripts:[];
+    const extras=manifest&&Array.isArray(manifest.extraScripts)?manifest.extraScripts:FALLBACK_EXTRAS;
     for(const path of extras){
       if(path==='smart-updater.js') continue;
       try{ await loadScriptFromDb(db,path); }
@@ -182,7 +201,15 @@
     let db=null, manifest=null;
     try{
       db=await openDb();
-      manifest=await fetchManifest();
+      try{ manifest=await fetchManifest(); }
+      catch(netErr){
+        console.warn('[ALMAS smart updater] online manifest unavailable',netErr);
+        manifest=readCachedManifest();
+        if(!manifest){
+          await runExtraPaths(db,FALLBACK_EXTRAS);
+          return;
+        }
+      }
       const list=Array.isArray(manifest.files)?manifest.files:[];
       const current=new Map((await getAll(db)).filter(Boolean).map(r=>[r.path,r]));
       const pending=[];
@@ -238,7 +265,7 @@
       if(window.gameDiagnostics){
         Object.assign(window.gameDiagnostics,{
           smartUpdater:true,
-          smartUpdaterVersion:1,
+          smartUpdaterVersion:2,
           updateManifestVersion:Number(manifest.contentVersion)||0,
           updateOnlyChangedFiles:true,
           reinstallRestore:true
@@ -252,7 +279,7 @@
         setProgress(0,'Жаңарту серверіне қосылмады','Кэштегі нұсқа ашылады');
         await sleep(900);
         hideOverlay();
-        if(db && manifest) await runExtras(db,manifest);
+        if(db) await runExtras(db,manifest);
       }catch(_){ }
     }
   }
