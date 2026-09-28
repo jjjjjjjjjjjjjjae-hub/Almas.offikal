@@ -1,16 +1,16 @@
 {
   "channel": "stable",
-  "contentVersion": 1,
-  "versionName": "0.8.0",
-  "message": "Smart incremental updater with reinstall recovery",
+  "contentVersion": 2,
+  "versionName": "0.8.1",
+  "message": "Smart updater v2 with reinstall recovery and offline cache fallback",
   "files": [
     {
       "path": "smart-updater.js",
       "label": "Жаңарту жүйесі",
       "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/smart-updater.js",
       "mime": "text/javascript",
-      "revision": "smart-1",
-      "fileVersion": 1,
+      "revision": "smart-2",
+      "fileVersion": 2,
       "legacyVersion": 9
     },
     {
