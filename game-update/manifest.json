@@ -1,39 +1,14 @@
 {
   "channel": "stable",
-  "contentVersion": 8,
-  "versionName": "0.7.2",
-  "message": "Two-hand weapon hold animations prepared for Sketchfab weapon models",
+  "contentVersion": 9,
+  "versionName": "0.8.0-bootstrap",
+  "message": "Install smart incremental updater",
   "files": [
     {
-      "path": "run-fov.js",
-      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/run-fov.js",
-      "mime": "text/javascript"
-    },
-    {
-      "path": "look-sensitivity.js",
-      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/look-sensitivity.js",
-      "mime": "text/javascript"
-    },
-    {
-      "path": "knife-hand-inspect.js",
-      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/knife-hand-inspect.js",
-      "mime": "text/javascript"
-    },
-    {
-      "path": "minimap.js",
-      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/minimap.js",
-      "mime": "text/javascript"
-    },
-    {
-      "path": "weapons-pack.js",
-      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/weapons-pack.js",
-      "mime": "text/javascript"
-    },
-    {
-      "path": "weapon-hold-anim.js",
-      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/weapon-hold-anim.js",
+      "path": "smart-updater.js",
+      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/smart-updater.js",
       "mime": "text/javascript"
     }
   ],
-  "extraScripts": ["run-fov.js", "look-sensitivity.js", "knife-hand-inspect.js", "minimap.js", "weapons-pack.js", "weapon-hold-anim.js"]
+  "extraScripts": ["smart-updater.js"]
 }
