@@ -1,4 +1,4 @@
-name: Build AlmasFox v0.4
+name: Build AlmasFox v0.5
 
 on:
   push:
@@ -62,17 +62,18 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Publish AlmasFox PC
+      - name: Publish AlmasFox PC v0.5
         shell: pwsh
         run: |
           dotnet publish almasfox-pc/AlmasFoxPC.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:DebugType=None -p:DebugSymbols=false -o output-pc
-          Get-FileHash output-pc/AlmasFoxPC.exe -Algorithm SHA256 | ForEach-Object { "$($_.Hash.ToLower())  AlmasFoxPC.exe" } | Set-Content output-pc/AlmasFoxPC.exe.sha256
+          Move-Item output-pc/AlmasFoxPC.exe output-pc/AlmasFoxPC-v0.5.exe
+          Get-FileHash output-pc/AlmasFoxPC-v0.5.exe -Algorithm SHA256 | ForEach-Object { "$($_.Hash.ToLower())  AlmasFoxPC-v0.5.exe" } | Set-Content output-pc/AlmasFoxPC-v0.5.exe.sha256
 
       - name: Upload PC app
         uses: actions/upload-artifact@v4
         with:
-          name: AlmasFox-PC-v0.4-Windows
+          name: AlmasFox-PC-v0.5-Windows
           path: |
-            output-pc/AlmasFoxPC.exe
-            output-pc/AlmasFoxPC.exe.sha256
+            output-pc/AlmasFoxPC-v0.5.exe
+            output-pc/AlmasFoxPC-v0.5.exe.sha256
           retention-days: 30
