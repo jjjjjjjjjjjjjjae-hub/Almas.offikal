@@ -17,10 +17,11 @@ public class LauncherActivity extends Activity {
         LinearLayout root=new LinearLayout(this); root.setOrientation(LinearLayout.VERTICAL); root.setGravity(Gravity.CENTER_VERTICAL); root.setPadding(dp(22),dp(32),dp(22),dp(32)); root.setBackgroundColor(BG);
         TextView t=text("ALMAS FOX",32,Color.WHITE,true); root.addView(t);
         TextView s=text("Қауіпсіз Root және Recovery көмекшісі",15,MUTED,false); s.setPadding(0,dp(5),0,dp(28)); root.addView(s);
-        Button first=button("ROOT ЖОҚ — BOOT ДЕРҚОРЫН АШУ"); first.setOnClickListener(v->startActivity(new Intent(this,DeviceFinderActivity.class))); root.addView(first);
+        Button verify=button("BOOT.IMG ТЕКСЕРУ → MAGISK → USB"); verify.setOnClickListener(v->startActivity(new Intent(this,BootVerifyActivity.class))); root.addView(verify);
+        Button first=button("BOOT ДЕРҚОРЫНАН ІЗДЕУ"); first.setOnClickListener(v->startActivity(new Intent(this,DeviceFinderActivity.class))); root.addView(first);
         Button tools=button("ROOT БАР — BOOT ҚҰРАЛДАРЫ"); tools.setOnClickListener(v->startActivity(new Intent(this,BootToolsActivity.class))); root.addView(tools);
         Button backup=button("BACKUP / RECOVERY ҚҰРАЛДАРЫ"); backup.setOnClickListener(v->startActivity(new Intent(this,MainActivity.class))); root.addView(backup);
-        TextView n=text("Алғашқы Root кезінде бөтен boot.img қолданылмайды. Дерқор тек нақты build fingerprint сәйкес келгенде ғана ұсыныс береді.",13,MUTED,false); n.setPadding(dp(4),dp(16),dp(4),0); root.addView(n);
+        TextView n=text("AlmasFox v0.4 boot.img-ті header, build және hash бойынша тексереді. Күшті сәйкестік жоқ болса автоматты flash бұғатталады.",13,MUTED,false); n.setPadding(dp(4),dp(16),dp(4),0); root.addView(n);
         setContentView(root);
     }
     private Button button(String label){ Button b=new Button(this); b.setText(label); b.setTextColor(Color.WHITE); b.setTextSize(14); b.setAllCaps(false); android.graphics.drawable.GradientDrawable g=new android.graphics.drawable.GradientDrawable(); g.setColor(Color.rgb(43,47,54)); g.setCornerRadius(dp(16)); b.setBackground(g); LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,dp(60)); p.setMargins(0,0,0,dp(14)); b.setLayoutParams(p); return b; }
