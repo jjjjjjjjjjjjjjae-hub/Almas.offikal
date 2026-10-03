@@ -1,4 +1,4 @@
-name: Build AlmasFox v0.5
+name: Build AlmasFox v0.6
 
 on:
   push:
@@ -41,13 +41,13 @@ jobs:
       - name: Prepare APK
         run: |
           mkdir -p output-android
-          cp almasfox-apk/app/build/outputs/apk/debug/app-debug.apk output-android/AlmasFox-v0.4.apk
-          sha256sum output-android/AlmasFox-v0.4.apk > output-android/AlmasFox-v0.4.apk.sha256
+          cp almasfox-apk/app/build/outputs/apk/debug/app-debug.apk output-android/AlmasFox-v0.6.apk
+          sha256sum output-android/AlmasFox-v0.6.apk > output-android/AlmasFox-v0.6.apk.sha256
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: AlmasFox-v0.4-Android
+          name: AlmasFox-v0.6-Android
           path: output-android/*
           retention-days: 30
 
@@ -62,18 +62,18 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Publish AlmasFox PC v0.5
+      - name: Publish AlmasFox PC v0.6
         shell: pwsh
         run: |
           dotnet publish almasfox-pc/AlmasFoxPC.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:DebugType=None -p:DebugSymbols=false -o output-pc
-          Move-Item output-pc/AlmasFoxPC.exe output-pc/AlmasFoxPC-v0.5.exe
-          Get-FileHash output-pc/AlmasFoxPC-v0.5.exe -Algorithm SHA256 | ForEach-Object { "$($_.Hash.ToLower())  AlmasFoxPC-v0.5.exe" } | Set-Content output-pc/AlmasFoxPC-v0.5.exe.sha256
+          Move-Item output-pc/AlmasFoxPC.exe output-pc/AlmasFoxPC-v0.6.exe
+          Get-FileHash output-pc/AlmasFoxPC-v0.6.exe -Algorithm SHA256 | ForEach-Object { "$($_.Hash.ToLower())  AlmasFoxPC-v0.6.exe" } | Set-Content output-pc/AlmasFoxPC-v0.6.exe.sha256
 
       - name: Upload PC app
         uses: actions/upload-artifact@v4
         with:
-          name: AlmasFox-PC-v0.5-Windows
+          name: AlmasFox-PC-v0.6-Windows
           path: |
-            output-pc/AlmasFoxPC-v0.5.exe
-            output-pc/AlmasFoxPC-v0.5.exe.sha256
+            output-pc/AlmasFoxPC-v0.6.exe
+            output-pc/AlmasFoxPC-v0.6.exe.sha256
           retention-days: 30
