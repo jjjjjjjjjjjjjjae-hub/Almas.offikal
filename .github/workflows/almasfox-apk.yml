@@ -41,12 +41,12 @@ jobs:
       - name: Prepare APK
         run: |
           mkdir -p output
-          cp almasfox-apk/app/build/outputs/apk/debug/app-debug.apk output/AlmasFox-v0.2.apk
-          sha256sum output/AlmasFox-v0.2.apk > output/AlmasFox-v0.2.apk.sha256
+          cp almasfox-apk/app/build/outputs/apk/debug/app-debug.apk output/AlmasFox-v0.3.apk
+          sha256sum output/AlmasFox-v0.3.apk > output/AlmasFox-v0.3.apk.sha256
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: AlmasFox-v0.2
+          name: AlmasFox-v0.3
           path: output/*
           retention-days: 30
