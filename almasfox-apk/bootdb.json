@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "updated": "2026-10-03",
+  "entries": [
+    {
+      "manufacturer": "Xiaomi",
+      "device": "laurel_sprout",
+      "model": "Mi A3",
+      "fingerprint": "Xiaomi/laurel_sprout/laurel_sprout:11/RKQ1.200903.002/V12.0.26.0.RFQMIXM:user/release-keys",
+      "android": "11",
+      "build": "V12.0.26.0.RFQMIXM",
+      "method": "remote_ota",
+      "image_type": "boot",
+      "source": "Xiaomi official recovery package",
+      "url": "https://bigota.d.miui.com/V12.0.26.0.RFQMIXM/miui_LAURELSPROUTGlobal_V12.0.26.0.RFQMIXM_88b2e6c4fb_11.0.zip",
+      "hash_type": "md5",
+      "hash": "88b2e6c4fba84155121e4eb684c623ba",
+      "trusted": true
+    },
+    {
+      "manufacturer": "Xiaomi",
+      "device": "laurel_sprout",
+      "model": "Mi A3",
+      "fingerprint": "Xiaomi/laurel_sprout/laurel_sprout:11/RKQ1.200903.002/V12.0.23.0.RFQEUXM:user/release-keys",
+      "android": "11",
+      "build": "V12.0.23.0.RFQEUXM",
+      "method": "remote_ota",
+      "image_type": "boot",
+      "source": "Xiaomi official EEA recovery package",
+      "url": "https://bigota.d.miui.com/V12.0.23.0.RFQEUXM/miui_LAURELSPROUTEEAGlobal_V12.0.23.0.RFQEUXM_b8e12280dc_11.0.zip",
+      "hash_type": "md5",
+      "hash": "b8e12280dc2139746e602a8c99c127c4",
+      "trusted": true
+    }
+  ]
+}
