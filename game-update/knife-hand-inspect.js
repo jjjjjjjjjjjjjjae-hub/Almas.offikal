@@ -1,6 +1,7 @@
 (function(){
   'use strict';
-  if (window.__almasKnifeHandInspect) return;
+  if (window.__almasKnifeHandInspectV2) return;
+  window.__almasKnifeHandInspectV2 = true;
   window.__almasKnifeHandInspect = true;
 
   const KNIFE_EQUIP_DURATION = 0.92;
@@ -15,10 +16,6 @@
   document.addEventListener('keydown', function(){ lastInputAt = performance.now(); }, {capture:true, passive:true});
 
   function clamp01(t){ return Math.max(0, Math.min(1, t)); }
-  function smooth01(t){
-    t = clamp01(t);
-    return t * t * (3 - 2 * t);
-  }
   function smoother01(t){
     t = clamp01(t);
     return t * t * t * (t * (t * 6 - 15) + 10);
@@ -35,10 +32,7 @@
   function isBusy(self){
     const ws = self && self.weaponSystem;
     const kc = self && self.knifeCombat;
-    return !!(
-      (kc && kc.elapsed >= 0) ||
-      (ws && (ws.firing || ws.isFiring || ws.shooting || ws.isShooting || ws.reloading || ws.isReloading))
-    );
+    return !!((kc && kc.elapsed >= 0) || (ws && (ws.firing || ws.isFiring || ws.shooting || ws.isShooting || ws.reloading || ws.isReloading)));
   }
 
   function findBone(root, patterns){
@@ -55,12 +49,9 @@
   function install(){
     let fv;
     try { fv = forearmView; } catch (_) { fv = null; }
-    if (!fv || !fv.update || fv.__knifeInspectPatched) {
-      requestAnimationFrame(install);
-      return;
-    }
+    if (!fv || !fv.update || fv.__knifeInspectPatchedV2) { requestAnimationFrame(install); return; }
 
-    fv.__knifeInspectPatched = true;
+    fv.__knifeInspectPatchedV2 = true;
     const originalUpdate = fv.update.bind(fv);
     const knife = fv.knifeMesh || null;
     const rightHand = findBone(fv.model, ['mixamorigrighthand','righthand','handr','rhand']);
@@ -73,34 +64,25 @@
     const worldQuat = new THREE.Quaternion();
     const spinQuat = new THREE.Quaternion();
     const newWorldQuat = new THREE.Quaternion();
+    let lastKnifeSpin = 0;
 
-    function spinKnifeAroundGrip(angle){
-      if (!knife || !knife.parent || !rightHand || !isFinite(angle) || Math.abs(angle) < 1e-5) return false;
-
+    function applyKnifeSpinDelta(delta){
+      if (!knife || !knife.parent || !rightHand || !isFinite(delta) || Math.abs(delta) < 1e-6) return false;
       knife.parent.updateMatrixWorld(true);
       rightHand.updateWorldMatrix(true, false);
       knife.updateWorldMatrix(true, false);
-
       rightHand.getWorldPosition(handPos);
       knife.getWorldPosition(worldPos);
       knife.getWorldQuaternion(worldQuat);
 
-      // Rotate around the hand/grip position, not around the blade centre.
-      // This is the important fix for the old animation entering the hand.
       try {
-        if (typeof camera !== 'undefined' && camera && camera.getWorldDirection) {
-          camera.getWorldDirection(axisWorld).normalize();
-        } else {
-          axisWorld.set(0, 0, -1);
-        }
-      } catch (_) {
-        axisWorld.set(0, 0, -1);
-      }
+        if (typeof camera !== 'undefined' && camera && camera.getWorldDirection) camera.getWorldDirection(axisWorld).normalize();
+        else axisWorld.set(0,0,-1);
+      } catch (_) { axisWorld.set(0,0,-1); }
 
-      worldPos.sub(handPos).applyAxisAngle(axisWorld, angle).add(handPos);
-      spinQuat.setFromAxisAngle(axisWorld, angle);
+      worldPos.sub(handPos).applyAxisAngle(axisWorld, delta).add(handPos);
+      spinQuat.setFromAxisAngle(axisWorld, delta);
       newWorldQuat.copy(spinQuat).multiply(worldQuat);
-
       knife.position.copy(worldPos);
       knife.parent.worldToLocal(knife.position);
       knife.parent.getWorldQuaternion(parentQuat);
@@ -108,6 +90,24 @@
       knife.quaternion.copy(parentInvQuat).multiply(newWorldQuat);
       knife.updateMatrix();
       return true;
+    }
+
+    // The requested angle is absolute for the current animation. We only apply
+    // the difference from the previous frame, preventing cumulative over-spin.
+    function setKnifeSpin(angle){
+      if (!isFinite(angle)) return;
+      const delta = angle - lastKnifeSpin;
+      if (applyKnifeSpinDelta(delta)) lastKnifeSpin = angle;
+    }
+    function resetKnifeSpin(){
+      if (Math.abs(lastKnifeSpin) < 1e-6) { lastKnifeSpin = 0; return; }
+      const turns = Math.round(lastKnifeSpin / (Math.PI * 2));
+      if (Math.abs(lastKnifeSpin - turns * Math.PI * 2) < 1e-4) {
+        lastKnifeSpin = 0;
+        return;
+      }
+      setKnifeSpin(0);
+      lastKnifeSpin = 0;
     }
 
     let idleTime = 0;
@@ -128,6 +128,7 @@
       const motion = this.motion;
 
       if (weapon !== lastWeapon) {
+        resetKnifeSpin();
         idleTime = 0;
         inspectTime = -1;
         inspectKind = '';
@@ -138,22 +139,23 @@
       }
 
       if (!motion || empty || !modelVisible) {
+        resetKnifeSpin();
         idleTime = 0;
         inspectTime = -1;
         equipTime = -1;
         return;
       }
 
-      // Small natural hand breathing/sway for every held weapon.
       const t = Number(this.time) || performance.now() * 0.001;
       const breath = Math.sin(t * 1.45);
       const micro = Math.sin(t * 0.82 + 0.7);
-      motion.position.y += breath * 0.0026;
-      motion.position.x += micro * 0.0015;
-      motion.rotation.x += breath * 0.0032;
-      motion.rotation.z += micro * 0.0022;
+      motion.position.y += breath * 0.0022;
+      motion.position.x += micro * 0.0012;
+      motion.rotation.x += breath * 0.0026;
+      motion.rotation.z += micro * 0.0018;
 
       if (running || moving || busy) {
+        resetKnifeSpin();
         idleTime = 0;
         inspectTime = -1;
         inspectKind = '';
@@ -161,22 +163,19 @@
         return;
       }
 
-      // Knife draw/equip: one clean grip-centred turn, with the hands moving with it.
       if (knifeSelected && equipTime >= 0) {
         equipTime += dt;
         const p = clamp01(equipTime / KNIFE_EQUIP_DURATION);
         const settle = Math.sin(Math.PI * p);
         const spinP = smoother01(clamp01(p / 0.82));
-
         motion.position.x -= 0.014 * settle;
         motion.position.y += 0.024 * settle;
         motion.position.z += 0.015 * settle;
         motion.rotation.x -= 0.055 * settle;
         motion.rotation.z -= 0.085 * settle;
-
-        spinKnifeAroundGrip(-Math.PI * 2 * spinP);
-
+        setKnifeSpin(-Math.PI * 2 * spinP);
         if (p >= 1) {
+          lastKnifeSpin = 0;
           equipTime = -1;
           idleTime = 0;
           nextInspect = FIRST_INSPECT_DELAY;
@@ -189,8 +188,8 @@
       if (inspectTime < 0 && idleTime >= nextInspect && quietFor > 1200) {
         inspectTime = 0;
         inspectKind = knifeSelected ? 'knife' : 'gun';
+        lastKnifeSpin = 0;
       }
-
       if (inspectTime < 0) return;
 
       inspectTime += dt;
@@ -200,19 +199,15 @@
       const side = Math.sin(Math.PI * 2 * p) * look;
 
       if (inspectKind === 'knife') {
-        // Bayonet/knife-style inspect. Whole hands move first; the knife turn is centred on the grip.
         motion.position.x += 0.018 * side;
         motion.position.y += 0.030 * look;
         motion.position.z += 0.022 * look;
         motion.rotation.x -= 0.060 * look;
         motion.rotation.y += 0.115 * side;
         motion.rotation.z -= 0.095 * look - 0.045 * side;
-
         const twirlP = smoother01((p - 0.24) / 0.52);
-        spinKnifeAroundGrip(Math.PI * 2 * twirlP);
+        setKnifeSpin(Math.PI * 2 * twirlP);
       } else {
-        // Rifle/pistol inspect: turn the complete hands+weapon viewmodel together,
-        // so the weapon never separates from the grip while the player looks over both sides.
         motion.position.x -= 0.040 * side;
         motion.position.y += 0.026 * look;
         motion.position.z += 0.043 * look;
@@ -223,6 +218,7 @@
       }
 
       if (p >= 1) {
+        lastKnifeSpin = 0;
         inspectTime = -1;
         inspectKind = '';
         idleTime = 0;
@@ -232,16 +228,14 @@
 
     if (window.gameDiagnostics) {
       Object.assign(window.gameDiagnostics, {
-        realisticHandSway: true,
-        knifeEquipGripSpin: true,
-        knifeInspectGripSafe: true,
-        weaponInspectTurn: true,
-        knifeInspectSourceReference: 'Bayonet_Inspect_W / KnifeDefault_Inspect_W',
-        firearmInspectSourceReference: 'M4_inspect_W',
-        inspectRetargetedToCurrentHands: true
+        realisticHandSway:true,
+        knifeEquipGripSpin:true,
+        knifeInspectGripSafe:true,
+        knifeDeltaSpinV2:true,
+        nonCumulativeKnifeSpin:true,
+        weaponInspectTurn:true
       });
     }
   }
-
   install();
 })();
