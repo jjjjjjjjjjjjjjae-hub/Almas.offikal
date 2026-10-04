@@ -1,8 +1,8 @@
 {
   "channel": "stable",
-  "contentVersion": 3,
-  "versionName": "0.8.1",
-  "message": "Smart updater v2 with reinstall recovery and offline cache fallback",
+  "contentVersion": 4,
+  "versionName": "0.8.2",
+  "message": "Hand rotation drift fix, smooth FPS hold animation and stable knife inspect",
   "files": [
     {
       "path": "smart-updater.js",
@@ -35,8 +35,8 @@
       "label": "Қол және пышақ анимациялары",
       "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/knife-hand-inspect.js",
       "mime": "text/javascript",
-      "revision": "056ecae365b050bb9284ead86b3402f2aa21e6cc",
-      "fileVersion": 1,
+      "revision": "a6616196b00ecb340ba9bb1b49c4bcfcc0170e3e",
+      "fileVersion": 2,
       "legacyVersion": 8
     },
     {
@@ -62,8 +62,8 @@
       "label": "Қаруды ұстау анимациясы",
       "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/weapon-hold-anim.js",
       "mime": "text/javascript",
-      "revision": "f8607997fb0b4b18c5f30ebdf4f8bd152fa94675",
-      "fileVersion": 1,
+      "revision": "28336cfe22c201fd67fedb92c11c6865234bc321",
+      "fileVersion": 2,
       "legacyVersion": 8
     }
   ],
