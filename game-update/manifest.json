@@ -1,8 +1,8 @@
 {
   "channel": "stable",
-  "contentVersion": 9,
-  "versionName": "0.8.0-bootstrap",
-  "message": "Install smart incremental updater",
+  "contentVersion": 10,
+  "versionName": "0.8.4-bootstrap",
+  "message": "Install smart updater v3 for multipart model updates",
   "files": [
     {
       "path": "smart-updater.js",
@@ -12,3 +12,4 @@
   ],
   "extraScripts": ["smart-updater.js"]
 }
+

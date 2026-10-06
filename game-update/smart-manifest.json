@@ -1,6 +1,6 @@
 {
   "channel": "stable",
-  "contentVersion": 7,
+  "contentVersion": 8,
   "versionName": "0.8.4",
   "message": "AK-47 with authored glove hands; holster and draw on every weapon switch; knife stowed on belt",
   "files": [
@@ -9,8 +9,9 @@
       "label": "Жаңарту жүйесі",
       "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/smart-updater.js",
       "mime": "text/javascript",
-      "revision": "smart-2",
-      "fileVersion": 2
+      "revision": "f5395490900ce3103dbeab83fdfef33646ce6955",
+      "fileVersion": 3,
+      "legacyVersion": 10
     },
     {
       "path": "run-fov.js",
