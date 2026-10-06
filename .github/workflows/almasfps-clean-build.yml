@@ -1,0 +1,31 @@
+name: AlmasFPS Clean APK
+on:
+  push:
+    branches: [almasfps-clean-wrapper]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Bundle Three.js offline
+        working-directory: almasfps-wrapper
+        run: |
+          curl -fL --retry 3 https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js -o app/src/main/assets/three.min.js
+          curl -fL --retry 3 https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js -o app/src/main/assets/GLTFLoader.js
+      - name: Build clean wrapper
+        working-directory: almasfps-wrapper
+        run: gradle :app:assembleDebug --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: almasfps-clean-wrapper-apk
+          path: almasfps-wrapper/app/build/outputs/apk/debug/app-debug.apk
