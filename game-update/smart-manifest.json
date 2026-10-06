@@ -1,8 +1,8 @@
 {
   "channel": "stable",
-  "contentVersion": 8,
-  "versionName": "0.8.4",
-  "message": "AK-47 with authored glove hands; holster and draw on every weapon switch; knife stowed on belt",
+  "contentVersion": 9,
+  "versionName": "0.8.5",
+  "message": "Қолдың өлшемі және қару қозғалысы түзетілді. AK-47 ұстағанда пышақ көрінбейді.",
   "files": [
     {
       "path": "smart-updater.js",
@@ -81,9 +81,9 @@
       "label": "AK-47 және қолғапты қолдар",
       "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/ak47-runtime.js",
       "mime": "text/javascript",
-      "revision": "6f99eec383f9e9357fb09ca2b8f2a38f6764b08420c3ac9de8c4bf21aafae97b",
-      "fileVersion": 1,
-      "size": 16264
+      "revision": "24e4d5158879b0ab2780000355fada5908a3e4c3ab5e68a5a9c97ee6aaf67080",
+      "fileVersion": 2,
+      "size": 25786
     },
     {
       "path": "models/ak47.glb",

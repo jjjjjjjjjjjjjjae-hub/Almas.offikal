@@ -49,8 +49,41 @@
     qs[0].setFromUnitVectors(from,to).multiply(lower.getWorldQuaternion(qs[1]));
     lower.quaternion.copy(lower.parent.getWorldQuaternion(qs[2]).invert().multiply(qs[0]));
     lower.updateMatrixWorld(true);
-    if(wristRotation)wrist.quaternion.copy(wrist.parent.getWorldQuaternion(qs[2]).invert().multiply(wristRotation));
+    if(wristRotation){
+      // Put pronation on the forearm rather than twisting the wrist by a full
+      // turn. Preserve its solved long axis while matching the desired hand's
+      // neutral local frame; the residual wrist rotation is only flexion.
+      const neutralInverse=wrist.userData.akGripNeutralInverse;
+      if(neutralInverse){
+        lower.getWorldPosition(e);wrist.getWorldPosition(w);
+        qs[3].copy(wristRotation).multiply(neutralInverse);
+        from.copy(wrist.position).normalize().applyQuaternion(qs[3]);
+        to.subVectors(w,e).normalize();
+        qs[0].setFromUnitVectors(from,to).multiply(qs[3]);
+        lower.quaternion.copy(lower.parent.getWorldQuaternion(qs[2]).invert().multiply(qs[0]));
+        lower.updateMatrixWorld(true);
+      }
+      wrist.quaternion.copy(wrist.parent.getWorldQuaternion(qs[2]).invert().multiply(wristRotation));
+    }
     wrist.updateMatrixWorld(true);
+  }
+
+  function relaxRightGrip(model,kind){
+    // The real knife handle is about 2.17cm thick, while the AK grip is 2.89cm.
+    // Open the existing fist slightly around the thicker shaft. The caller
+    // restores the authored pose first, so these rotations never accumulate.
+    let parts=model.userData.akRightGripParts;
+    if(!parts){
+      parts=model.userData.akRightGripParts={
+        second:['R_point2_033','R_middle2_037','R_ring2_042','R_pink2_046'].map(n=>model.getObjectByName(n)).filter(Boolean),
+        third:['R_point3_034','R_middle3_038','R_ring3_043','R_pink3_047'].map(n=>model.getObjectByName(n)).filter(Boolean),
+        thumb:model.getObjectByName('R_thumb2_029')
+      };
+    }
+    const narrow=kind==='pistol';
+    for(const bone of parts.second)bone.rotateX(narrow?.08:.12);
+    for(const bone of parts.third)bone.rotateX(narrow?.07:.10);
+    if(parts.thumb)parts.thumb.rotateX(narrow?.04:.06);
   }
 
   function install(fv,ws,asset,draw){
@@ -58,8 +91,41 @@
     const names=['R_arm_025','R_elbow_026','R_wrist_027','L_arm_02','L_elbow_03','L_wrist_04'];
     const bones=names.map(n=>fv.model.getObjectByName(n));
     if(bones.some(x=>!x))throw Error('AK-47 glove rig missing an arm bone');
-    ws.__ak47Installed=true;
-    fv.mixer.setTime(0);fv.model.updateMatrixWorld(true);
+    // Check cached assets before changing the working viewmodel. A damaged
+    // draw file must leave the original hands and weapon usable.
+    const sourceSamples=draw?.samples;
+    const validTuple=(a,n)=>Array.isArray(a)&&a.length===n&&a.every(Number.isFinite);
+    if(!Number.isFinite(draw?.duration)||draw.duration<=0||!Array.isArray(sourceSamples)||sourceSamples.length<2||
+      sourceSamples.some((sample,i)=>!Number.isFinite(sample.time)||(i>0&&sample.time<sourceSamples[i-1].time)||
+        !validTuple(sample.positionDelta,3)||!validTuple(sample.rotationDelta,4)))throw Error('AK draw curve invalid');
+    if(!fv.knifeMesh?.geometry)throw Error('Knife handle geometry missing for glove grip');
+    const landmarks=['R_middle1_036','R_middle_039','R_ring1_041','R_ring_044','R_pink1_045','R_pink_048',
+      'L_point1_00','L_middle1_012','L_middle_015','L_ring1_017','L_ring_020','L_pink1_021','L_pink_024'];
+    if(landmarks.some(name=>!fv.model.getObjectByName(name)))throw Error('Glove grip landmarks missing');
+    if(!asset?.scene)throw Error('AK-47 model scene missing');
+    fv.mixer.setTime(0);
+    // The Sketchfab rig is authored in centimeters. The old width-based
+    // normalization made gloves about 1.6 times their physical size.
+    fv.model.scale.setScalar(.0105);
+    fv.model.position.set(0,0,0);
+    fv.motion.updateWorldMatrix(true,true);
+    const rigBounds=new THREE.Box3(),localBounds=new THREE.Box3();
+    const inverseMotion=fv.motion.matrixWorld.clone().invert(),relativeMatrix=new THREE.Matrix4();
+    fv.model.traverse(o=>{
+      if(!o.isMesh||!o.geometry)return;
+      if(!o.geometry.boundingBox)o.geometry.computeBoundingBox();
+      relativeMatrix.copy(inverseMotion).multiply(o.matrixWorld);
+      localBounds.copy(o.geometry.boundingBox).applyMatrix4(relativeMatrix);
+      rigBounds.union(localBounds);
+    });
+    fv.model.position.copy(new THREE.Vector3(.035,-.26,-.78).sub(rigBounds.getCenter(V())));
+    fv.motion.updateWorldMatrix(true,true);
+    // The exported knife has independent goal/knife animation tracks. Bind
+    // its visible mesh to the real glove wrist so attacks cannot detach it.
+    const knifeBind=new THREE.Matrix4().copy(bones[2].matrixWorld).invert().multiply(fv.knifeMesh.matrixWorld);
+    bones[2].add(fv.knifeMesh);
+    knifeBind.decompose(fv.knifeMesh.position,fv.knifeMesh.quaternion,fv.knifeMesh.scale);
+    fv.motion.updateWorldMatrix(true,true);
     const saved=[];fv.model.traverse(o=>{if(o.isBone)saved.push({bone:o,p:o.position.clone(),q:o.quaternion.clone(),s:o.scale.clone()});});
     const restore=()=>{for(const x of saved){x.bone.position.copy(x.p);x.bone.quaternion.copy(x.q);x.bone.scale.copy(x.s);}};
 
@@ -77,6 +143,11 @@
     fv.motion.add(rifle);ws.viewCache.rifle=rifle;if(ws.active==='rifle')ws.gunView=rifle;
     for(const kind of ['pistol','sniper']){
       const view=ws.viewCache[kind];if(view&&view.parent!==fv.motion){view.parent?.remove(view);fv.motion.add(view);}
+    }
+    // Physical-sized arms start below the screen, close to the torso. Bring
+    // each gun within their reach once; the shared motion root stays bounded.
+    for(const kind of ['rifle','pistol','sniper']){
+      const view=ws.viewCache[kind];if(view)view.position.z+=.14;
     }
     const rightTarget=V(),leftTarget=V(),rightHint=V(),leftHint=V(),rightRotation=Q(),leftRotation=Q();
     const handOffsetR=V(),handOffsetL=V();
@@ -130,8 +201,6 @@
     restore();fv.model.updateMatrixWorld(true);
     const transitionAnchor=V(),rotatedAnchor=V(),deltaPosition=V(),deltaQuaternion=Q();
     const sampleQ0=Q(),sampleQ1=Q();
-    const sourceSamples=draw.samples;
-    if(!Array.isArray(sourceSamples)||sourceSamples.length<2)throw Error('AK draw curve invalid');
 
     function sampleMotion(progress){
       const t=THREE.MathUtils.clamp(progress,0,1)*draw.duration;
@@ -162,13 +231,63 @@
       fv.motion.position.add(deltaPosition);
       fv.motion.quaternion.premultiply(deltaQuaternion);
     }
+    function positionShoulders(rightOffset,leftOffset){
+      // Upper sleeves start below the camera frustum; their cut ends must not
+      // hover beside the weapon. Move only the shoulder origins, then solve
+      // the original arm lengths back to the visible hand contacts.
+      fv.motion.updateWorldMatrix(true,true);
+      const rotation=fv.motion.getWorldQuaternion(Q());
+      for(const [bone,offset] of [[bones[0],rightOffset],[bones[3],leftOffset]]){
+        const position=bone.getWorldPosition(V()).add(V().fromArray(offset).applyQuaternion(rotation));
+        bone.position.copy(bone.parent.worldToLocal(position));
+      }
+      fv.motion.updateWorldMatrix(true,true);
+    }
+    function knifePose(){
+      // Keep the source slash/idle hand paths and finger animation. Only the
+      // hidden shoulder starts and elbow bend are adapted to first person.
+      fv.motion.updateWorldMatrix(true,true);
+      const wrists=[bones[2],bones[5]],targets=wrists.map(w=>w.getWorldPosition(V()));
+      const rotations=wrists.map(w=>w.getWorldQuaternion(Q()));
+      const inverses=wrists.map(w=>w.quaternion.clone().invert());
+      const lengths=[bones[1].getWorldPosition(V()).distanceTo(targets[0]),bones[4].getWorldPosition(V()).distanceTo(targets[1])];
+      const reaches=[bones[0].getWorldPosition(V()).distanceTo(bones[1].getWorldPosition(V()))+lengths[0],
+        bones[3].getWorldPosition(V()).distanceTo(bones[4].getWorldPosition(V()))+lengths[1]];
+      positionShoulders([0,-.20,0],[0,-.20,0]);
+      for(let side=0;side<2;side++){
+        const i=side*3,wrist=wrists[side];
+        // A few inspection frames fully extend the source arm. Keep that hand
+        // path by allowing a small shoulder glide instead of clamping its wrist.
+        const start=bones[i].getWorldPosition(V()),toward=targets[side].clone().sub(start);
+        const excess=toward.length()-(reaches[side]-.0005);
+        if(excess>0){
+          start.addScaledVector(toward.normalize(),excess);
+          bones[i].position.copy(bones[i].parent.worldToLocal(start));
+          bones[i].updateMatrixWorld(true);
+        }
+        const previousNeutral=wrist.userData.akGripNeutralInverse;
+        wrist.userData.akGripNeutralInverse=inverses[side];
+        const axis=wrist.position.clone().normalize().applyQuaternion(rotations[side].clone().multiply(inverses[side]));
+        const hint=targets[side].clone().addScaledVector(axis,-lengths[side]);
+        const offset=V().set(side===0?.035:-.02,-.035,.01).applyQuaternion(fv.motion.getWorldQuaternion(Q()));
+        hint.add(offset);
+        solveArm(bones[i],bones[i+1],wrist,targets[side],hint,rotations[side]);
+        wrist.userData.akGripNeutralInverse=previousNeutral;
+      }
+      fv.model.updateMatrixWorld(true);
+      fv.model.traverse(o=>{if(o.isSkinnedMesh)o.skeleton.update();});
+    }
     function gunPose(kind,view){
       // All firearm slots share the authored glove material and two-bone arm chains.
       fv.model.visible=true;fv.setKnifePartVisible(false);if(fv.localKnife)fv.localKnife.visible=false;
-      fv.mixer.setTime(0);curlLeft();fv.motion.updateWorldMatrix(true,true);
+      fv.mixer.setTime(0);curlLeft();relaxRightGrip(fv.model,kind);fv.motion.updateWorldMatrix(true,true);
+      for(const wrist of [bones[2],bones[5]]){
+        if(!wrist.userData.akGripNeutralInverse)wrist.userData.akGripNeutralInverse=wrist.quaternion.clone().invert();
+      }
+      positionShoulders([0,-.20,.30],[0,-.15,.08]);
       if(kind==='rifle'){
-        rightTarget.set(-.155,-.035,0);leftTarget.set(.10,.018,0);
-        desiredGripAxis.set(.24,.97,0);
+        rightTarget.set(-.184,-.055,-.01134);leftTarget.set(.10,.04542565,-.01134);
+        desiredGripAxis.set(.3744,.9273,0);
         leftHandleAxis.set(1,0,0);
       }else if(kind==='pistol'){
         rightTarget.set(0,-.15,-.07);leftTarget.set(-.05,-.12,-.13);
@@ -184,13 +303,18 @@
       view.localToWorld(rightTarget);view.localToWorld(leftTarget);
       desiredGripAxis.transformDirection(view.matrixWorld);
       leftHandleAxis.transformDirection(view.matrixWorld);
-      fv.motion.localToWorld(rightHint.set(.44,-.56,-.20));fv.motion.localToWorld(leftHint.set(-.40,-.50,-.50));
       bones[2].getWorldQuaternion(rightRotation);bones[5].getWorldQuaternion(leftRotation);
-      // Turn the closed knife fist onto the firearm grip without changing its
-      // finger curl, then subtract its measured socket to solve the wrist.
-      rightHandleAxis.copy(rightHandleAxisLocal).applyQuaternion(rightRotation).normalize();
-      gripTurn.setFromUnitVectors(rightHandleAxis,desiredGripAxis);
-      rightRotation.premultiply(gripTurn).normalize();
+      // Fit both shaft and palm side. A one-axis knife-to-grip rotation leaves
+      // arbitrary roll and folds the cuff even when a numeric socket matches.
+      handOffsetR.set(-1,0,0).addScaledVector(rightHandleAxisLocal,rightHandleAxisLocal.x).normalize();
+      handOffsetL.crossVectors(handOffsetR,rightHandleAxisLocal).normalize();
+      gripBasis.makeBasis(handOffsetR,rightHandleAxisLocal,handOffsetL);
+      gripTurn.setFromRotationMatrix(gripBasis).invert();
+      rightHandleAxis.set(kind==='rifle'?0:-1,0,kind==='rifle'?-1:0).transformDirection(view.matrixWorld);
+      rightHandleAxis.addScaledVector(desiredGripAxis,-rightHandleAxis.dot(desiredGripAxis)).normalize();
+      handOffsetL.crossVectors(rightHandleAxis,desiredGripAxis).normalize();
+      gripBasis.makeBasis(rightHandleAxis,desiredGripAxis,handOffsetL);
+      rightRotation.setFromRotationMatrix(gripBasis).multiply(gripTurn).normalize();
       // Support palms face up under long guns, and inward from the left for a
       // two-hand pistol hold. The measured knuckle span follows the weapon.
       leftPalmNormal.set(kind==='pistol'?1:0,kind==='pistol'?0:1,0).transformDirection(fv.motion.matrixWorld);
@@ -202,6 +326,17 @@
       handOffsetR.copy(rightGripLocal).multiply(worldScaleR).applyQuaternion(rightRotation);
       handOffsetL.copy(leftGripLocal).multiply(worldScaleL).applyQuaternion(leftRotation);
       rightTarget.sub(handOffsetR);leftTarget.sub(handOffsetL);
+      // Locate elbow hints behind each target along its neutral forearm axis.
+      // Fixed camera hints previously put the right elbow in front of the
+      // wrist, producing more than 100 degrees of backward wrist flexion.
+      const lowerAxisR=scratch[9].copy(bones[2].position).normalize().applyQuaternion(qs[4].copy(rightRotation).multiply(bones[2].userData.akGripNeutralInverse));
+      const lowerAxisL=scratch[10].copy(bones[5].position).normalize().applyQuaternion(qs[5].copy(leftRotation).multiply(bones[5].userData.akGripNeutralInverse));
+      const forearmR=bones[1].getWorldPosition(scratch[0]).distanceTo(bones[2].getWorldPosition(scratch[1]));
+      const forearmL=bones[4].getWorldPosition(scratch[0]).distanceTo(bones[5].getWorldPosition(scratch[1]));
+      const elbowOffset=scratch[11].set(.035,-.045,.02).transformDirection(fv.motion.matrixWorld).multiplyScalar(Math.sqrt(.035*.035+.045*.045+.02*.02));
+      rightHint.copy(rightTarget).addScaledVector(lowerAxisR,-forearmR).add(elbowOffset);
+      elbowOffset.set(-.02,-.035,.005).transformDirection(fv.motion.matrixWorld).multiplyScalar(Math.sqrt(.02*.02+.035*.035+.005*.005));
+      leftHint.copy(leftTarget).addScaledVector(lowerAxisL,-forearmL).add(elbowOffset);
       solveArm(bones[0],bones[1],bones[2],rightTarget,rightHint,rightRotation);
       solveArm(bones[3],bones[4],bones[5],leftTarget,leftHint,leftRotation);
       fv.model.updateMatrixWorld(true);
@@ -214,16 +349,19 @@
       const kind=ws.active,view=ws.viewCache[kind];
       if(kind!=='knife'&&view){
         const sprint=this.sprintBlend||0,move=this.moveBlend||0,t=this.time;
-        this.motion.position.set(Math.sin(t*7)*.004*move,-Math.abs(Math.cos(t*7))*.005*move-.025*sprint,-.025*sprint);
+        this.motion.position.set(-.025+Math.sin(t*7)*.004*move,.015-Math.abs(Math.cos(t*7))*.005*move-.025*sprint,-.18-.025*sprint);
         this.motion.rotation.set(-.025*sprint,0,-.012*sprint);
         const shots=Number(window.gameDiagnostics.shotsFired)||0;
         if(shots!==this.__akLastShots){this.__akRecoil=.024;this.__akLastShots=shots;}
         this.__akRecoil=(this.__akRecoil||0)*Math.exp(-18*Math.max(0,dt));
         this.motion.position.z+=this.__akRecoil||0;
         gunPose(kind,view);
-      }
+      }else if(kind==='knife')knifePose();
       applyTransition();
       updateBelts();
+      // Synchronize the current camera and root after every pose change. The
+      // knife path also needs this; ancestor matrices may still be last frame's.
+      this.motion.updateWorldMatrix(true,true);
       if(window.gameDiagnostics){window.gameDiagnostics.ak47GloveHands=kind==='rifle';window.gameDiagnostics.weaponDrawCurveApplied=!!ws.__equipmentSwitch?.switching;}
     };
 
@@ -244,13 +382,16 @@
     }
     function updateBelts(){
       let localBody,remote;try{localBody=playerModel;remote=opponentAvatar;}catch(_){}
-      const local=attachBelt(ws.knifeCombat,localBody);if(local)local.visible=ws.active!=='knife';
+      // The local body is hidden in first person. Its belt prop must also stay
+      // hidden, otherwise the moving pelvis draws a floating knife under a gun.
+      const local=attachBelt(ws.knifeCombat,localBody);if(local)local.visible=false;
       if(remote){const belt=attachBelt(remote.knifeCombat,remote.model);if(belt)belt.visible=remote.weapon!=='knife';}
       if(window.gameDiagnostics)window.gameDiagnostics.knifeBeltStow=!!local;
     }
     // Provide inspectable provenance without adding controls to the combat HUD.
     window.almasWeaponCredits={model:{author:'Valerij Dancenko (Bortensol)',license:'CC-BY-4.0',url:'https://sketchfab.com/3d-models/ak-47-game-ready-model-cdef9a881faa41dba65270872c205844'},animation:draw.source};
-    Object.assign(window.gameDiagnostics,{ak47Loaded:true,ak47Triangles:12512,ak47Source:'supplied Sketchfab GLB',ak47AuthoredGloveRig:true,allGunsUseGloveHands:true,weaponSwitchAnimationSource:'Cransh / GitHub FPS-Arms-3D',weaponSwitchAnimationLicense:'CC-BY-4.0',rightGloveGripSocket:rightGripLocal.toArray(),leftGloveGripSocket:leftGripLocal.toArray(),firearmGripUsesMeasuredGloveSockets:true});
+    Object.assign(window.gameDiagnostics,{ak47Loaded:true,ak47Triangles:12512,ak47Source:'supplied Sketchfab GLB',ak47AuthoredGloveRig:true,allGunsUseGloveHands:true,weaponSwitchAnimationSource:'Cransh / GitHub FPS-Arms-3D',weaponSwitchAnimationLicense:'CC-BY-4.0',rightGloveGripSocket:rightGripLocal.toArray(),leftGloveGripSocket:leftGripLocal.toArray(),firearmGripUsesMeasuredGloveSockets:true,firstPersonRigScale:.0105,physicalGloveScale:true,knifeRigidWristBinding:true,localStowedKnifeHidden:true});
+    ws.__ak47Installed=true;
   }
   wait();
 })();
