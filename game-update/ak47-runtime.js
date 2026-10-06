@@ -253,7 +253,7 @@
       const lengths=[bones[1].getWorldPosition(V()).distanceTo(targets[0]),bones[4].getWorldPosition(V()).distanceTo(targets[1])];
       const reaches=[bones[0].getWorldPosition(V()).distanceTo(bones[1].getWorldPosition(V()))+lengths[0],
         bones[3].getWorldPosition(V()).distanceTo(bones[4].getWorldPosition(V()))+lengths[1]];
-      positionShoulders([0,-.20,0],[0,-.20,0]);
+      positionShoulders([0,-.23,0],[0,-.23,0]);
       for(let side=0;side<2;side++){
         const i=side*3,wrist=wrists[side];
         // A few inspection frames fully extend the source arm. Keep that hand
@@ -284,7 +284,7 @@
       for(const wrist of [bones[2],bones[5]]){
         if(!wrist.userData.akGripNeutralInverse)wrist.userData.akGripNeutralInverse=wrist.quaternion.clone().invert();
       }
-      positionShoulders([0,-.20,.30],[0,-.15,.08]);
+      positionShoulders([0,-.23,.30],[0,-.18,.08]);
       if(kind==='rifle'){
         rightTarget.set(-.184,-.055,-.01134);leftTarget.set(.10,.04542565,-.01134);
         desiredGripAxis.set(.3744,.9273,0);
