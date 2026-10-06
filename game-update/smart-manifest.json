@@ -1,6 +1,6 @@
 {
   "channel": "stable",
-  "contentVersion": 6,
+  "contentVersion": 7,
   "versionName": "0.8.4",
   "message": "AK-47 with authored glove hands; holster and draw on every weapon switch; knife stowed on belt",
   "files": [
@@ -87,11 +87,28 @@
     {
       "path": "models/ak47.glb",
       "label": "AK-47 моделі",
-      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/models/ak47.glb",
       "mime": "model/gltf-binary",
       "revision": "0085b657d2245c741321fb13f576bb7bce4f55f37a5912f66ff07578a5d1d1db",
       "fileVersion": 1,
-      "size": 7601316
+      "size": 7601316,
+      "parts": [
+        "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/models/ak47-parts/ak47.01.b64",
+        "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/models/ak47-parts/ak47.02.b64",
+        "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/models/ak47-parts/ak47.03.b64",
+        "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/models/ak47-parts/ak47.04.b64",
+        "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/models/ak47-parts/ak47.05.b64",
+        "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/models/ak47-parts/ak47.06.b64",
+        "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/models/ak47-parts/ak47.07.b64",
+        "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/models/ak47-parts/ak47.08.b64",
+        "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/models/ak47-parts/ak47.09.b64",
+        "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/models/ak47-parts/ak47.10.b64",
+        "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/models/ak47-parts/ak47.11.b64",
+        "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/models/ak47-parts/ak47.12.b64",
+        "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/models/ak47-parts/ak47.13.b64",
+        "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/models/ak47-parts/ak47.14.b64",
+        "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/models/ak47-parts/ak47.15.b64"
+      ],
+      "compression": "gzip"
     },
     {
       "path": "models/weapon-draw.json",
