@@ -1,8 +1,8 @@
 {
   "channel": "stable",
-  "contentVersion": 5,
-  "versionName": "0.8.3",
-  "message": "Stable knife hands: remove spin/drift bug and keep smooth non-cumulative FPS sway",
+  "contentVersion": 6,
+  "versionName": "0.8.4",
+  "message": "AK-47 with authored glove hands; holster and draw on every weapon switch; knife stowed on belt",
   "files": [
     {
       "path": "smart-updater.js",
@@ -65,6 +65,51 @@
       "revision": "28336cfe22c201fd67fedb92c11c6865234bc321",
       "fileVersion": 2,
       "legacyVersion": 8
+    },
+    {
+      "path": "equipment-switch.js",
+      "label": "Қару ауыстыру",
+      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/equipment-switch.js",
+      "mime": "text/javascript",
+      "revision": "36af43489378cc7a1adbcad49c0e17bf2119c87875dcf43604841ad894f20814",
+      "fileVersion": 1,
+      "size": 9327
+    },
+    {
+      "path": "ak47-runtime.js",
+      "label": "AK-47 және қолғапты қолдар",
+      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/ak47-runtime.js",
+      "mime": "text/javascript",
+      "revision": "6f99eec383f9e9357fb09ca2b8f2a38f6764b08420c3ac9de8c4bf21aafae97b",
+      "fileVersion": 1,
+      "size": 16264
+    },
+    {
+      "path": "models/ak47.glb",
+      "label": "AK-47 моделі",
+      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/models/ak47.glb",
+      "mime": "model/gltf-binary",
+      "revision": "0085b657d2245c741321fb13f576bb7bce4f55f37a5912f66ff07578a5d1d1db",
+      "fileVersion": 1,
+      "size": 7601316
+    },
+    {
+      "path": "models/weapon-draw.json",
+      "label": "Қаруды көтеру анимациясы",
+      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/models/weapon-draw.json",
+      "mime": "application/json",
+      "revision": "508d7e5e886f5960917a7554b863d3c430b27e2ffd110decf32f2c59b47a2035",
+      "fileVersion": 1,
+      "size": 12244
+    },
+    {
+      "path": "AK47-CREDITS.txt",
+      "label": "Модель және анимация авторлары",
+      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/AK47-CREDITS.txt",
+      "mime": "text/plain",
+      "revision": "da6987ad7d07d23b49c489b8f772a71a84e08006bc94fb53f0fe2f853bfc77d5",
+      "fileVersion": 1,
+      "size": 1098
     }
   ],
   "extraScripts": [
@@ -73,6 +118,8 @@
     "knife-hand-inspect.js",
     "minimap.js",
     "weapons-pack.js",
-    "weapon-hold-anim.js"
+    "weapon-hold-anim.js",
+    "equipment-switch.js",
+    "ak47-runtime.js"
   ]
 }

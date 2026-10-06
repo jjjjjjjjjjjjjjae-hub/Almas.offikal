@@ -1,0 +1,17 @@
+AK-47 game ready model
+Author: Valerij Dancenko / Bortensol
+Source: https://sketchfab.com/3d-models/ak-47-game-ready-model-cdef9a881faa41dba65270872c205844
+License: Creative Commons Attribution 4.0 International
+https://creativecommons.org/licenses/by/4.0/
+Changes: centered and aligned for first-person use; paired with the existing authored glove rig. Original supplied GLB bytes retained.
+
+FPS AK-74m animations
+Author: Cransh
+Source: https://github.com/Ayush-Mohanty/FPS-Arms-3D/tree/c80a452e680c5a27c9e936176eb17e446869529a/Models/fps_ak-74m_animations
+Model: https://sketchfab.com/3d-models/fps-ak-74m-animations-94be8385c402474cacd39bc096c6ca14
+License: Creative Commons Attribution 4.0 International
+https://creativecommons.org/licenses/by/4.0/
+Changes: global right-hand AK_Draw motion sampled at 60 fps, adapted to the existing glove rig and camera space; reversed for holster with a belt-directed offset.
+The GitHub repository's MIT code license does not replace this asset's CC-BY license.
+
+Existing glove arms and knife retain the APK's original credits and licenses.
