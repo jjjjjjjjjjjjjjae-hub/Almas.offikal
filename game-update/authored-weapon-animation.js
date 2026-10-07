@@ -24,7 +24,7 @@
   window.almasCreateAuthoredWeaponAnimation=function(options){
     const {fv,ws,drawData:data,bones,solveArm,rightGripLocal,leftGripLocal}=options;
     const ref=data.reference,gun=ws.viewCache.rifle;
-    const gunBaseP=gun.position.clone().add(V().set(-.12,-.045,-.32));
+    const gunBaseP=gun.position.clone().add(V().set(-.06,-.065,-.23));
     const alignment=Q().setFromEuler(new THREE.Euler(.10,.08,0,'YXZ'));
     const gunBaseQ=gun.quaternion.clone();
     const refGunQ=Q().fromArray(ref,29),inverseRefGunQ=refGunQ.clone().invert();
@@ -37,9 +37,10 @@
     const wristRelativeRef=[9,22].map(o=>inverseRefGunQ.clone().multiply(Q().fromArray(ref,o)).normalize());
     const targets=[V(),V()],hints=[V(),V()],rotations=[Q(),Q()],shoulders=[V(),V()];
     const authoredNeutral=Q();
+    const leftGripCorrection=Q().fromArray(ref,22).invert().multiply(Q().setFromAxisAngle(V().set(0,0,1),.50)).multiply(Q().setFromAxisAngle(V().set(1,0,0),.55)).multiply(Q().fromArray(ref,22)).normalize();
     const gloveScales=[bones[2].getWorldScale(V()),bones[5].getWorldScale(V())];
     const gloveWorld=new THREE.Matrix4(),inverseForearm=new THREE.Matrix4();
-    const contacts=[V().set(-.184,-.055,-.01134),V().set(.10,.04542565,-.01134)];
+    const contacts=[V().set(-.184,-.055,-.01134),V().set(.035,.04542565,-.01134)];
     const offsets=[rightGripLocal.clone(),leftGripLocal.clone()];
     // Measure the original glove after applying the supplied rifle fist.
     // Its closed finger cavity differs from the original knife fist.
@@ -114,7 +115,7 @@
         bone.position.fromArray(rest.position);bone.scale.fromArray(rest.scale);bone.quaternion.fromArray(frame,49+i*4).normalize();
       }
       const sourceDelta=Q().fromArray(frame,29).multiply(inverseRefGunQ).normalize();
-      const motionWeight=name==='AK_Run'?.30:name==='AK_Walk'?.65:1;
+      const motionWeight=name==='AK_Run'?.16:name==='AK_Walk'?.65:1;
       const delta=Q().slerp(sourceDelta,motionWeight).normalize();
       const poseCorrection=delta.clone().multiply(sourceDelta.clone().invert());
       gun.position.copy(gunBaseP).add(V().fromArray(frame,26).sub(refGunP).multiplyScalar(motionScale*motionWeight).applyQuaternion(alignment));
@@ -122,7 +123,7 @@
       if(name.startsWith('AK_Reload')){
         const duration=data.clips[name].duration;
         const framing=THREE.MathUtils.clamp(Math.min(time/.10,(duration-time)/.15),0,1);
-        gun.position.y-=.055*framing;
+        gun.position.y-=.185*framing;
       }
       if(switching?.switching){
         const p=switching.phase==='holster'?1-switching.progress:switching.progress;
@@ -137,20 +138,22 @@
           const relativeWrist=sourceGunQ.clone().invert().multiply(sourceWrist).normalize();
           sourceWrist.copy(sourceGunQ).multiply(wristRelativeRef[side].clone().slerp(relativeWrist,motionWeight));
         }
+        if(side)sourceWrist.multiply(leftGripCorrection);
         rotations[side].copy(rootQ).multiply(alignment).multiply(poseCorrection).multiply(sourceWrist).normalize();
         const scale=gloveScales[side];
         const contact=gun.localToWorld(contacts[side].clone());
         const path=V().fromArray(frame,o).sub(sourceGunP).applyQuaternion(sourceGunQ.clone().invert()).sub(relativeRef[side]).applyQuaternion(sourceGunQ).multiplyScalar(motionScale*motionWeight).applyQuaternion(poseCorrection).applyQuaternion(alignment).applyQuaternion(rootQ);
         targets[side].copy(contact).sub(offsets[side].clone().multiply(scale).applyQuaternion(rotations[side])).add(path);
         hints[side].copy(targets[side]).add(V().fromArray(frame,side?16:3).sub(V().fromArray(frame,o)).applyQuaternion(poseCorrection).applyQuaternion(alignment).applyQuaternion(rootQ));
-        const forearmLength=bones[i+1].getWorldPosition(V()).distanceTo(wrist.getWorldPosition(V()))*.78;
+        const forearmLength=bones[i+1].getWorldPosition(V()).distanceTo(wrist.getWorldPosition(V()))*.50;
         const straightHint=targets[side].clone().addScaledVector(wrist.position.clone().normalize().applyQuaternion(rotations[side]),-forearmLength);
-        hints[side].lerp(straightHint,.80);
+        hints[side].copy(straightHint);
         // Keep shoulder ends below the view, with a shorter forearm and an
         // elbow direction biased toward a relaxed, straighter wrist.
-        shoulders[side].copy(targets[side]).add(V().set(side?-.03:.03,-.30,.40).applyQuaternion(rootQ));
+        const upperLength=bones[i].getWorldPosition(V()).distanceTo(bones[i+1].getWorldPosition(V()));
+        shoulders[side].copy(straightHint).add(V().set(side?-.03:.03,-.25,.18).normalize().multiplyScalar(upperLength).applyQuaternion(rootQ));
         bones[i].position.copy(bones[i].parent.worldToLocal(shoulders[side]));
-        bones[i+1].scale.z*=.78;
+        bones[i+1].scale.z*=.50;
         bones[i].updateMatrixWorld(true);
         const previousNeutral=wrist.userData.akGripNeutralInverse;
         wrist.userData.akGripNeutralInverse=authoredNeutral;

@@ -244,6 +244,30 @@
       }
       fv.motion.updateWorldMatrix(true,true);
     }
+    const compactGloveScales=[bones[2].getWorldScale(V()),bones[5].getWorldScale(V())];
+    const compactGloveWorld=new THREE.Matrix4(),compactInverseForearm=new THREE.Matrix4();
+    function compactArm(side,target,rotation,neutralInverse){
+      const i=side*3,upper=bones[i],lower=bones[i+1],wrist=bones[i+2];
+      const lowerLength=lower.getWorldPosition(V()).distanceTo(wrist.getWorldPosition(V()))*.50;
+      const upperLength=upper.getWorldPosition(V()).distanceTo(lower.getWorldPosition(V()));
+      const axis=wrist.position.clone().normalize().applyQuaternion(rotation.clone().multiply(neutralInverse));
+      const hint=target.clone().addScaledVector(axis,-lowerLength);
+      const shoulder=hint.clone().add(V().set(side?-.03:.03,-.20,.24).normalize().multiplyScalar(upperLength).applyQuaternion(fv.motion.getWorldQuaternion(Q())));
+      upper.position.copy(upper.parent.worldToLocal(shoulder));
+      lower.scale.z*=.50;
+      upper.updateMatrixWorld(true);
+      const previousNeutral=wrist.userData.akGripNeutralInverse;
+      wrist.userData.akGripNeutralInverse=neutralInverse;
+      solveArm(upper,lower,wrist,target,hint,rotation);
+      wrist.userData.akGripNeutralInverse=previousNeutral;
+      // Retain the original glove and knife socket despite the shorter parent.
+      // Its full affine inverse prevents compressed or sheared fingers.
+      compactGloveWorld.compose(target,rotation,compactGloveScales[side]);
+      compactInverseForearm.copy(lower.matrixWorld).invert();
+      wrist.matrix.copy(compactInverseForearm).multiply(compactGloveWorld);
+      wrist.matrixAutoUpdate=false;
+      wrist.updateMatrixWorld(true);
+    }
     function knifePose(){
       // Keep the source slash/idle hand paths and finger animation. Only the
       // hidden shoulder starts and elbow bend are adapted to first person.
@@ -251,29 +275,8 @@
       const wrists=[bones[2],bones[5]],targets=wrists.map(w=>w.getWorldPosition(V()));
       const rotations=wrists.map(w=>w.getWorldQuaternion(Q()));
       const inverses=wrists.map(w=>w.quaternion.clone().invert());
-      const lengths=[bones[1].getWorldPosition(V()).distanceTo(targets[0]),bones[4].getWorldPosition(V()).distanceTo(targets[1])];
-      const reaches=[bones[0].getWorldPosition(V()).distanceTo(bones[1].getWorldPosition(V()))+lengths[0],
-        bones[3].getWorldPosition(V()).distanceTo(bones[4].getWorldPosition(V()))+lengths[1]];
-      positionShoulders([0,-.23,0],[0,-.23,0]);
       for(let side=0;side<2;side++){
-        const i=side*3,wrist=wrists[side];
-        // A few inspection frames fully extend the source arm. Keep that hand
-        // path by allowing a small shoulder glide instead of clamping its wrist.
-        const start=bones[i].getWorldPosition(V()),toward=targets[side].clone().sub(start);
-        const excess=toward.length()-(reaches[side]-.0005);
-        if(excess>0){
-          start.addScaledVector(toward.normalize(),excess);
-          bones[i].position.copy(bones[i].parent.worldToLocal(start));
-          bones[i].updateMatrixWorld(true);
-        }
-        const previousNeutral=wrist.userData.akGripNeutralInverse;
-        wrist.userData.akGripNeutralInverse=inverses[side];
-        const axis=wrist.position.clone().normalize().applyQuaternion(rotations[side].clone().multiply(inverses[side]));
-        const hint=targets[side].clone().addScaledVector(axis,-lengths[side]);
-        const offset=V().set(side===0?.035:-.02,-.035,.01).applyQuaternion(fv.motion.getWorldQuaternion(Q()));
-        hint.add(offset);
-        solveArm(bones[i],bones[i+1],wrist,targets[side],hint,rotations[side]);
-        wrist.userData.akGripNeutralInverse=previousNeutral;
+        compactArm(side,targets[side],rotations[side],inverses[side]);
       }
       fv.model.updateMatrixWorld(true);
       fv.model.traverse(o=>{if(o.isSkinnedMesh)o.skeleton.update();});
@@ -361,7 +364,10 @@
         this.__akRecoil=(this.__akRecoil||0)*Math.exp(-18*Math.max(0,dt));
         this.motion.position.z+=this.__akRecoil||0;
         gunPose(kind,view);
-      }else if(kind==='knife')knifePose();
+      }else if(kind==='knife'){
+        this.motion.position.y-=.105;
+        knifePose();
+      }
       if(!authoredPose)applyTransition();
       updateBelts();
       // Synchronize the current camera and root after every pose change. The

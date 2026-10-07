@@ -1,8 +1,8 @@
 {
   "channel": "stable",
-  "contentVersion": 11,
-  "versionName": "0.8.7",
-  "message": "Қолдың өлшемі ықшамдалды. Дайын AK анимациялары сақталып, қаруды ұстау түзетілді.",
+  "contentVersion": 12,
+  "versionName": "0.8.8",
+  "message": "Қолғап пен қысқа білек көрінетіндей қаруды ұстау көрінісі түзетілді.",
   "files": [
     {
       "path": "smart-updater.js",
@@ -81,18 +81,18 @@
       "label": "Дайын AK анимацияларын басқару",
       "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/authored-weapon-animation.js",
       "mime": "text/javascript",
-      "revision": "b60d5af852b3abc501ded730bf151440518f98a1bdb1fb98388e43f869fb98f7",
-      "fileVersion": 2,
-      "size": 13157
+      "revision": "56b6ebf7b950c051bde08568a8e374ae65273f630d8db5cfff156d99335d809c",
+      "fileVersion": 3,
+      "size": 13561
     },
     {
       "path": "ak47-runtime.js",
       "label": "AK-47 және қолғапты қолдар",
       "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/ak47-runtime.js",
       "mime": "text/javascript",
-      "revision": "9fd3ad730a5ed9b7be9dd7fd1d317a2d27ad3d7d61de237a64d70db17b8e49b7",
-      "fileVersion": 5,
-      "size": 26534
+      "revision": "b373d3f1ac2fd905a0426b7477d159cb6aeb5b99a2f1b2f6c7f5d6ad3752bd8e",
+      "fileVersion": 6,
+      "size": 26767
     },
     {
       "path": "models/ak47.glb",
