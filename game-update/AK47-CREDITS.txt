@@ -7,11 +7,12 @@ Changes: centered and aligned for first-person use; paired with the existing aut
 
 FPS AK-74m animations
 Author: Cransh
+Author profile: https://sketchfab.com/ccransh
 Source: https://github.com/Ayush-Mohanty/FPS-Arms-3D/tree/c80a452e680c5a27c9e936176eb17e446869529a/Models/fps_ak-74m_animations
 Model: https://sketchfab.com/3d-models/fps-ak-74m-animations-94be8385c402474cacd39bc096c6ca14
 License: Creative Commons Attribution 4.0 International
 https://creativecommons.org/licenses/by/4.0/
-Changes: global right-hand AK_Draw motion sampled at 60 fps, adapted to the existing glove rig and camera space; reversed for holster with a belt-directed offset.
+Changes: all eight supplied AK clips (Idle, Draw, Walk, Run, Shot, Reload, Reload_var2, Reload_full) sampled at 60 fps. Global source hand and rifle motion and finger rotations are retargeted onto the APK's existing glove skeleton. Only animation data is imported; source meshes, materials, textures and skin weights are excluded. The supplied AK-47 model and original glove geometry are retained. Reversed Draw serves the existing holster transition; the source pack does not contain a separate Holster or Inspect clip.
 The GitHub repository's MIT code license does not replace this asset's CC-BY license.
 
 Existing glove arms and knife retain the APK's original credits and licenses.

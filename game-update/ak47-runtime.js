@@ -15,13 +15,13 @@
 
   function json(url){return new Promise((resolve,reject)=>new THREE.FileLoader().setResponseType('json').load(url,resolve,undefined,reject));}
   function glb(url){return new Promise((resolve,reject)=>new THREE.GLTFLoader().load(url,resolve,undefined,reject));}
-  const assets=Promise.all([glb('models/ak47.glb'),json('models/weapon-draw.json')]);
+  const assets=Promise.all([glb('models/ak47.glb'),json('models/weapon-draw.json'),window.almasCreateAuthoredWeaponAnimation?json('models/weapon-authored.json'):Promise.resolve(null)]);
   assets.catch(e=>{console.error('[ALMAS AK-47]',e);if(window.gameDiagnostics)window.gameDiagnostics.ak47Error=String(e.message||e);});
 
   function wait(){
     let fv,ws;try{fv=forearmView;ws=weaponSystem;}catch(_){}
     if(!fv||!fv.model||!fv.mixer||!ws||!ws.camera){requestAnimationFrame(wait);return;}
-    assets.then(([asset,draw])=>install(fv,ws,asset,draw)).catch(e=>{
+    assets.then(([asset,draw,authored])=>install(fv,ws,asset,draw,authored)).catch(e=>{
       console.error('[ALMAS AK-47 install]',e);
       if(window.gameDiagnostics)window.gameDiagnostics.ak47Error=String(e.message||e);
     });
@@ -86,7 +86,7 @@
     if(parts.thumb)parts.thumb.rotateX(narrow?.04:.06);
   }
 
-  function install(fv,ws,asset,draw){
+  function install(fv,ws,asset,draw,authored){
     if(ws.__ak47Installed)return;
     const names=['R_arm_025','R_elbow_026','R_wrist_027','L_arm_02','L_elbow_03','L_wrist_04'];
     const bones=names.map(n=>fv.model.getObjectByName(n));
@@ -103,6 +103,7 @@
       'L_point1_00','L_middle1_012','L_middle_015','L_ring1_017','L_ring_020','L_pink1_021','L_pink_024'];
     if(landmarks.some(name=>!fv.model.getObjectByName(name)))throw Error('Glove grip landmarks missing');
     if(!asset?.scene)throw Error('AK-47 model scene missing');
+    if(window.almasCreateAuthoredWeaponAnimation)window.almasValidateAuthoredWeaponAnimation(authored,fv.model);
     fv.mixer.setTime(0);
     // The Sketchfab rig is authored in centimeters. The old width-based
     // normalization made gloves about 1.6 times their physical size.
@@ -343,11 +344,15 @@
       fv.model.traverse(o=>{if(o.isSkinnedMesh)o.skeleton.update();});
     }
 
+    for(const wrist of [bones[2],bones[5]])wrist.userData.akGripNeutralInverse=wrist.quaternion.clone().invert();
+    const authoredController=authored?window.almasCreateAuthoredWeaponAnimation({fv,ws,drawData:authored,bones,solveArm,restore,rightGripLocal,leftGripLocal}):null;
+    if(authoredController)fv.__authoredWeaponAnimations=authoredController;
     const baseUpdate=fv.update.bind(fv);
     fv.update=function(dt,running,moving){
       restore();baseUpdate(dt,running,moving);
       const kind=ws.active,view=ws.viewCache[kind];
-      if(kind!=='knife'&&view){
+      const authoredPose=authoredController?.update(dt,running,moving);
+      if(!authoredPose&&kind!=='knife'&&view){
         const sprint=this.sprintBlend||0,move=this.moveBlend||0,t=this.time;
         this.motion.position.set(-.025+Math.sin(t*7)*.004*move,.015-Math.abs(Math.cos(t*7))*.005*move-.025*sprint,-.18-.025*sprint);
         this.motion.rotation.set(-.025*sprint,0,-.012*sprint);
@@ -357,7 +362,7 @@
         this.motion.position.z+=this.__akRecoil||0;
         gunPose(kind,view);
       }else if(kind==='knife')knifePose();
-      applyTransition();
+      if(!authoredPose)applyTransition();
       updateBelts();
       // Synchronize the current camera and root after every pose change. The
       // knife path also needs this; ancestor matrices may still be last frame's.

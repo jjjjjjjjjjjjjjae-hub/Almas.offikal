@@ -1,8 +1,8 @@
 {
   "channel": "stable",
-  "contentVersion": 9,
-  "versionName": "0.8.5",
-  "message": "Қолдың өлшемі және қару қозғалысы түзетілді. AK-47 ұстағанда пышақ көрінбейді.",
+  "contentVersion": 10,
+  "versionName": "0.8.6",
+  "message": "AK-47 үшін дайын ұстау, жүру, жүгіру, ату және оқтау анимациялары өз қолымызға қосылды.",
   "files": [
     {
       "path": "smart-updater.js",
@@ -77,13 +77,22 @@
       "size": 9327
     },
     {
+      "path": "authored-weapon-animation.js",
+      "label": "Дайын AK анимацияларын басқару",
+      "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/authored-weapon-animation.js",
+      "mime": "text/javascript",
+      "revision": "6b1fde09aa31ccca52659c3257764942a17600def81e1ce9ff50c41660aee299",
+      "fileVersion": 1,
+      "size": 11215
+    },
+    {
       "path": "ak47-runtime.js",
       "label": "AK-47 және қолғапты қолдар",
       "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/ak47-runtime.js",
       "mime": "text/javascript",
-      "revision": "fcc95d0839b144c167607bb85f09a34cb62409ed0c8ce16464c9fde7cb70a923",
-      "fileVersion": 3,
-      "size": 25786
+      "revision": "b682b099920da08c6f92f48e03ff96c833ed534684b9309e112753d637d3ab79",
+      "fileVersion": 4,
+      "size": 26485
     },
     {
       "path": "models/ak47.glb",
@@ -121,13 +130,25 @@
       "size": 12244
     },
     {
+      "path": "models/weapon-authored.json",
+      "label": "AK ұстау, жүру, ату және оқтау анимациялары",
+      "mime": "application/json",
+      "revision": "7ab52a967d1ef73ec0bfd7dcb44e1f350f7dc6adb845f30dba7b68649d2d615e",
+      "fileVersion": 1,
+      "size": 1309850,
+      "parts": [
+        "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/models/weapon-authored-parts/weapon-authored.01.b64"
+      ],
+      "compression": "gzip"
+    },
+    {
       "path": "AK47-CREDITS.txt",
       "label": "Модель және анимация авторлары",
       "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/AK47-CREDITS.txt",
       "mime": "text/plain",
-      "revision": "da6987ad7d07d23b49c489b8f772a71a84e08006bc94fb53f0fe2f853bfc77d5",
-      "fileVersion": 1,
-      "size": 1098
+      "revision": "4ca6918a605acff8e08584dd7a7af8a67a07508b7d80935fdb896d81db2837b7",
+      "fileVersion": 2,
+      "size": 1485
     }
   ],
   "extraScripts": [
@@ -138,6 +159,7 @@
     "weapons-pack.js",
     "weapon-hold-anim.js",
     "equipment-switch.js",
+    "authored-weapon-animation.js",
     "ak47-runtime.js"
   ]
 }
