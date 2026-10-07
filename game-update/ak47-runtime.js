@@ -127,8 +127,8 @@
     bones[2].add(fv.knifeMesh);
     knifeBind.decompose(fv.knifeMesh.position,fv.knifeMesh.quaternion,fv.knifeMesh.scale);
     fv.motion.updateWorldMatrix(true,true);
-    const saved=[];fv.model.traverse(o=>{if(o.isBone)saved.push({bone:o,p:o.position.clone(),q:o.quaternion.clone(),s:o.scale.clone()});});
-    const restore=()=>{for(const x of saved){x.bone.position.copy(x.p);x.bone.quaternion.copy(x.q);x.bone.scale.copy(x.s);}};
+    const saved=[];fv.model.traverse(o=>{if(o.isBone)saved.push({bone:o,p:o.position.clone(),q:o.quaternion.clone(),s:o.scale.clone(),a:o.matrixAutoUpdate});});
+    const restore=()=>{for(const x of saved){x.bone.matrixAutoUpdate=x.a;x.bone.position.copy(x.p);x.bone.quaternion.copy(x.q);x.bone.scale.copy(x.s);}};
 
     const rifle=new THREE.Group();rifle.name='AK47_Sketchfab_view';
     const model=asset.scene;model.updateMatrixWorld(true);

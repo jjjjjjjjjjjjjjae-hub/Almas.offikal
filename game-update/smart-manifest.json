@@ -1,8 +1,8 @@
 {
   "channel": "stable",
-  "contentVersion": 10,
-  "versionName": "0.8.6",
-  "message": "AK-47 үшін дайын ұстау, жүру, жүгіру, ату және оқтау анимациялары өз қолымызға қосылды.",
+  "contentVersion": 11,
+  "versionName": "0.8.7",
+  "message": "Қолдың өлшемі ықшамдалды. Дайын AK анимациялары сақталып, қаруды ұстау түзетілді.",
   "files": [
     {
       "path": "smart-updater.js",
@@ -81,18 +81,18 @@
       "label": "Дайын AK анимацияларын басқару",
       "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/authored-weapon-animation.js",
       "mime": "text/javascript",
-      "revision": "6b1fde09aa31ccca52659c3257764942a17600def81e1ce9ff50c41660aee299",
-      "fileVersion": 1,
-      "size": 11215
+      "revision": "b60d5af852b3abc501ded730bf151440518f98a1bdb1fb98388e43f869fb98f7",
+      "fileVersion": 2,
+      "size": 13157
     },
     {
       "path": "ak47-runtime.js",
       "label": "AK-47 және қолғапты қолдар",
       "url": "https://raw.githubusercontent.com/jjjjjjjjjjjjjjae-hub/Almas.offikal/main/game-update/ak47-runtime.js",
       "mime": "text/javascript",
-      "revision": "b682b099920da08c6f92f48e03ff96c833ed534684b9309e112753d637d3ab79",
-      "fileVersion": 4,
-      "size": 26485
+      "revision": "9fd3ad730a5ed9b7be9dd7fd1d317a2d27ad3d7d61de237a64d70db17b8e49b7",
+      "fileVersion": 5,
+      "size": 26534
     },
     {
       "path": "models/ak47.glb",
